@@ -6,6 +6,20 @@
 $ pnpm install
 ```
 
+## Generate database migration scripts
+
+```bash
+# development
+$ pnpm db:generate
+```
+
+## Perform database migration
+
+```bash
+# development
+$ pnpm db:migrate
+```
+
 ## Compile and run the project
 
 ```bash

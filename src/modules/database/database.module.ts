@@ -10,7 +10,7 @@ import { DATABASE_CONNECTION } from "./database-connection";
     {
       provide: DATABASE_CONNECTION,
       useFactory: (configService: ConfigService) => {
-        const pool = new Pool({ connectionString: configService.get("DATABASE_URL") });
+        const pool = new Pool({ connectionString: configService.get((env) => env.DATABASE_URL) });
         return drizzle(pool, { schema: { ...userSchemas } });
       },
       inject: [ConfigService],

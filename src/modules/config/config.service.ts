@@ -28,12 +28,15 @@ export class ConfigService {
     return {
       NODE_ENV: data.NODE_ENV,
 
-      JWT_SECRET: data.JWT_SECRET,
-
       GOOGLE_OAUTH: {
         clientID: data.GOOGLE_CLIENT_ID,
         callbackURL: data.GOOGLE_CALLBACK_URL,
         clientSecret: data.GOOGLE_CLIENT_SECRET,
+      },
+
+      JWT: {
+        secret: data.JWT_SECRET,
+        expiresIn: "5m",
       },
 
       DATABASE_URL: data.DATABASE_URL,

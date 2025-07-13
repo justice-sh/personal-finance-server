@@ -1,17 +1,14 @@
-import { ConfigService } from "@/modules/config/config.service";
+import * as jwt from "jsonwebtoken";
 import { StringValue } from "@/types/jwt";
 import { Injectable } from "@nestjs/common";
-import * as jwt from "jsonwebtoken";
+import { ConfigService } from "@/modules/config/config.service";
 
 @Injectable()
 export class JwtService {
   private readonly options: { secret: string; expiresIn: StringValue };
 
   constructor(private readonly configService: ConfigService) {
-    this.options = {
-      secret: this.configService.get("JWT_SECRET"),
-      expiresIn: "5m",
-    };
+    this.options = this.configService.get((env) => env.JWT);
   }
 
   sign(payload: string | object): string {
