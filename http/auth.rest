@@ -1,0 +1,10 @@
+Post http://localhost:3001/auth
+
+{
+  "email": "test@user.com",
+  "password": "StrongPassword123!"
+}
+
+###
+
+Get http://localhost:3001/auth/oauth/google

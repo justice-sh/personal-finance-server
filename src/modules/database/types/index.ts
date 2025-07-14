@@ -1,3 +1,3 @@
-import * as userSchemas from "../schemas/users";
+import * as userSchemas from "../schemas/user";
 
-export type User = typeof userSchemas.users.$inferSelect;
+export type User = typeof userSchemas.UserTable.$inferSelect;

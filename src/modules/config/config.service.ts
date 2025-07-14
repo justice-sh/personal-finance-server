@@ -9,7 +9,8 @@ import { EnvSchema } from "@/validation-schemas/env";
 @Injectable()
 export class ConfigService {
   constructor() {
-    this.validate();
+    const result = EnvSchema.safeParse(process.env);
+    if (!result.success) throw new Error(fromZodError(result.error).message);
   }
 
   get<R, K extends ExactPathForValue<ConfigData, R>>(selector: (env: ConfigData) => R): R {
@@ -17,31 +18,15 @@ export class ConfigService {
     return selector(data);
   }
 
-  private validate() {
-    const result = EnvSchema.safeParse(process.env);
-    if (!result.success) throw new Error(fromZodError(result.error).message);
-  }
-
   private transform(): ConfigData {
     const data = process.env as EnvData;
 
     return {
-      NODE_ENV: data.NODE_ENV,
-
-      GOOGLE_OAUTH: {
-        clientID: data.GOOGLE_CLIENT_ID,
-        callbackURL: data.GOOGLE_CALLBACK_URL,
-        clientSecret: data.GOOGLE_CLIENT_SECRET,
-      },
-
+      ...data,
       JWT: {
         secret: data.JWT_SECRET,
         expiresIn: "5m",
       },
-
-      DATABASE_URL: data.DATABASE_URL,
-
-      CLIENT_APP_URL: data.CLIENT_APP_URL,
     };
   }
 }

@@ -1,6 +1,5 @@
 import { Request } from "express";
 import { User } from "../database/types";
-import { GoogleUser } from "./dto/provider";
 import { JwtService } from "@/modules/jwt/jwt.service";
 import { UsersService } from "@/modules/users/users.service";
 import { BadRequestException, Injectable, Req } from "@nestjs/common";
@@ -11,11 +10,11 @@ export class AuthService {
     private jwtService: JwtService,
     private usersService: UsersService,
   ) {}
-  async signIn(user: User, request: Request) {
+  async signIn(user: Pick<User, "id" | "email">, request: Request) {
     const token = this.generateToken(user);
 
     request.res?.setHeader("Authorization", `Bearer ${token}`);
-    return { accessToken: token, user: {}, refreshToken: "" };
+    return { accessToken: token, refreshToken: "" };
   }
 
   async verifyLogin(data: { email: string; password: string }) {
@@ -34,7 +33,7 @@ export class AuthService {
     return authorization?.split(" ")[1];
   }
 
-  generateToken(user: User) {
+  generateToken(user: Pick<User, "id" | "email">) {
     const payload = { email: user.email, sub: user.id };
     return this.jwtService.sign(payload);
   }

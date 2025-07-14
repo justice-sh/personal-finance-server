@@ -1,31 +1,15 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-  UsePipes,
-} from "@nestjs/common";
-import { GoogleUser } from "./dto/provider";
-import { Request, Response } from "express";
+import { Request } from "express";
 import { AuthService } from "./auth.service";
-import { ConfigService } from "../config/config.service";
-import { ProviderService } from "./services/provider.service";
-import { AuthGuard as PassportAuthGuard } from "@nestjs/passport";
+import { OAuthService } from "./oauth/oauth.service";
 import { ZodValidationPipe } from "@/pipes/zod-validation/zod-validation.pipe";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UsePipes } from "@nestjs/common";
 
 @Controller("auth")
 @UsePipes(new ZodValidationPipe())
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly providerService: ProviderService,
-    private readonly configService: ConfigService,
+    private readonly oAuthService: OAuthService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -36,23 +20,22 @@ export class AuthController {
     return { message: "Login successful", data: token };
   }
 
-  @Get("google")
-  @UseGuards(PassportAuthGuard("google"))
-  async googleAuth() {
-    return "Redirecting to Google...";
+  @HttpCode(HttpStatus.OK)
+  @Get("oauth/:provider")
+  async getOAuthUrl(@Req() req: Request) {
+    const url = this.oAuthService.getAuthUrl(req);
+    return { url };
   }
 
-  @Get("google/callback")
-  @UseGuards(PassportAuthGuard("google"))
-  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const data = this.providerService.getGoogleUser(req.user as GoogleUser);
-    const user = await this.providerService.saveUser(data);
+  @HttpCode(HttpStatus.OK)
+  @Get("callback/:provider")
+  async providerCallback(@Req() req: Request<{ provider: string }>) {
+    const user = await this.oAuthService.linkUser(req);
+    const auth = this.authService.signIn(user, req);
 
-    if (!user.emailVerifiedAt) throw new BadRequestException("Email not verified");
-
-    const token = await this.authService.signIn(user, req);
-
-    const url = this.configService.get((env) => env.CLIENT_APP_URL);
-    res.redirect(`${url}?token=${token}`);
+    return {
+      message: `${req.params.provider} login successful`,
+      data: auth,
+    };
   }
 }

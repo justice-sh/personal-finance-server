@@ -1,10 +1,11 @@
 import { Pool } from "pg";
-import { Module } from "@nestjs/common";
-import * as userSchemas from "./schemas/users";
+import { Global, Module } from "@nestjs/common";
+import * as userSchemas from "./schemas/user";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { ConfigService } from "../config/config.service";
 import { DATABASE_CONNECTION } from "./database-connection";
 
+@Global()
 @Module({
   providers: [
     {

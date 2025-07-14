@@ -2,7 +2,7 @@ import * as bcrypt from "bcrypt";
 import { User } from "../database/types";
 import { CreateUserDto } from "./user.dto";
 import { Inject, Injectable } from "@nestjs/common";
-import * as userSchemas from "../database/schemas/users";
+import * as userSchemas from "../database/schemas/user";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
 import { NodePgDatabase } from "drizzle-orm/node-postgres/driver";
 import { DATABASE_CONNECTION } from "../database/database-connection";
@@ -15,27 +15,27 @@ export class UsersService {
   ) {}
 
   async createUser(data: CreateUserDto): Promise<User> {
-    const result = await this.database.insert(userSchemas.users).values(data).returning();
+    const result = await this.database.insert(userSchemas.UserTable).values(data).returning();
     return result[0];
   }
 
   findById(id: string): Promise<User | undefined> {
-    return this.database.query.users.findFirst({
+    return this.database.query.UserTable.findFirst({
       where: (users, { eq }) => eq(users.id, id),
     });
   }
 
   findByEmail(email: string): Promise<User | undefined> {
-    return this.database.query.users.findFirst({
+    return this.database.query.UserTable.findFirst({
       where: (users, { eq }) => eq(users.email, email),
     });
   }
 
   async updateUser(id: string, data: Partial<User>) {
     const result = await this.database
-      .update(userSchemas.users)
+      .update(userSchemas.UserTable)
       .set(data)
-      .where(eq(userSchemas.users.id, id))
+      .where(eq(userSchemas.UserTable.id, id))
       .returning();
 
     return result[0];
