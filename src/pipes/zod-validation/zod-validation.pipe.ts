@@ -20,7 +20,9 @@ export class ZodValidationPipe implements PipeTransform {
 
     if (result.success) return result.data as unknown;
 
-    throw new BadRequestException(fromZodError(result.error, { prefix: "", includePath: false, prefixSeparator: "" }).message);
+    throw new BadRequestException(
+      fromZodError(result.error, { prefix: "", includePath: false, prefixSeparator: "" }).message,
+    );
   }
 }
 

@@ -1,10 +1,17 @@
-Post http://localhost:3001/auth
+Post {{baseUrl}}/auth
+Content-Type: application/json
 
 {
-  "email": "test@user.com",
-  "password": "StrongPassword123!"
+  "email": "{{email}}",
+  "password": "{{password}}"
 }
 
 ###
 
-Get http://localhost:3001/auth/oauth/google
+Post {{baseUrl}}/auth/me
+Content-Type: application/json
+{{authorization-header}}
+
+###
+
+Get {{baseUrl}}/auth/oauth/google

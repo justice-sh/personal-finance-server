@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EnvSchema } from "@/validation-schemas/env";
+import { EnvSchema } from "@/common/schemas/env";
 
 export type EnvData = z.infer<typeof EnvSchema>;
 

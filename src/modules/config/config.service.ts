@@ -4,7 +4,7 @@ import { ConfigData } from "./config.type";
 import { Injectable } from "@nestjs/common";
 import { ExactPathForValue } from "@/types/utils";
 import { fromZodError } from "zod-validation-error";
-import { EnvSchema } from "@/validation-schemas/env";
+import { EnvSchema } from "@/common/schemas/env";
 
 @Injectable()
 export class ConfigService {
@@ -25,7 +25,7 @@ export class ConfigService {
       ...data,
       JWT: {
         secret: data.JWT_SECRET,
-        expiresIn: "5m",
+        expiresIn: "15m",
       },
     };
   }

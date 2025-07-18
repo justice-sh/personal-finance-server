@@ -14,7 +14,7 @@ export class UsersService {
     private readonly database: NodePgDatabase<typeof userSchemas>,
   ) {}
 
-  async createUser(data: CreateUserDto): Promise<User> {
+  async create(data: CreateUserDto): Promise<User> {
     const result = await this.database.insert(userSchemas.UserTable).values(data).returning();
     return result[0];
   }

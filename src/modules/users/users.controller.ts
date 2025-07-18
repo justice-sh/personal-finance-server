@@ -21,7 +21,7 @@ export class UsersController {
     if (existingUser) throw new BadRequestException("Email already exists");
 
     const hashedPassword = await this.usersService.hashPassword(data.password);
-    await this.usersService.createUser({ ...data, password: hashedPassword });
+    await this.usersService.create({ ...data, password: hashedPassword });
 
     const code = this.otpService.generateCode();
     await this.otpService.sendOtp({ ...data, code, type: "verification" });

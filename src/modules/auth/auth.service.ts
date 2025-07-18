@@ -3,6 +3,7 @@ import { User } from "../database/types";
 import { JwtService } from "@/modules/jwt/jwt.service";
 import { UsersService } from "@/modules/users/users.service";
 import { BadRequestException, Injectable, Req } from "@nestjs/common";
+import { JwtPayload } from "jsonwebtoken";
 
 @Injectable()
 export class AuthService {
@@ -11,10 +12,18 @@ export class AuthService {
     private usersService: UsersService,
   ) {}
   async signIn(user: Pick<User, "id" | "email">, request: Request) {
-    const token = this.generateToken(user);
+    const accessToken = this.generateToken(user);
 
-    request.res?.setHeader("Authorization", `Bearer ${token}`);
-    return { accessToken: token, refreshToken: "" };
+    request.res?.setHeader("Authorization", `Bearer ${accessToken}`);
+
+    request.res?.cookie("access_token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    });
+
+    return { accessToken };
   }
 
   async verifyLogin(data: { email: string; password: string }) {
@@ -24,13 +33,22 @@ export class AuthService {
     const isValid = await this.usersService.verifyPassword(data.password, user.password);
     if (!isValid) throw new BadRequestException("Invalid email or password");
 
-    if (!user.emailVerifiedAt) throw new BadRequestException("Email not verified");
+    // TODO: enable later, also, consider having a EmailNotVerifiedException
+    // if (!user.emailVerifiedAt) throw new BadRequestException("Email not verified");
     return user;
   }
 
-  retriveToken(request: Request) {
+  retriveToken(request: Request): string | undefined {
     const authorization = request.headers["authorization"];
-    return authorization?.split(" ")[1];
+
+    let token = authorization?.split(" ")[1];
+    if (token) return token;
+
+    token = request.cookies?.["access_token"];
+    if (token) return token;
+
+    token = request.body.accessToken;
+    return token;
   }
 
   generateToken(user: Pick<User, "id" | "email">) {
@@ -38,7 +56,14 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  verifyToken(token: string) {
-    return this.jwtService.verify<{ email: string }>(token);
+  verifyToken(token: string): Promise<JwtPayload & { email: string }> {
+    return new Promise((resolve, reject) => {
+      try {
+        const payload = this.jwtService.verify(token) as JwtPayload & { email: string };
+        resolve(payload);
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 }

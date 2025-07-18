@@ -1,0 +1,12 @@
+Post {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "name": "Justice League"
+}
+
+###
+
+Get {{baseUrl}}/auth/oauth/google

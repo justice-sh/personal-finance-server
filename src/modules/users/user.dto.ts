@@ -1,4 +1,4 @@
-import { PasswordSchema } from "@/validation-schemas/user";
+import { PasswordSchema } from "@/common/schemas/user";
 import { createZodDto } from "nestjs-zod";
 import z from "zod";
 
