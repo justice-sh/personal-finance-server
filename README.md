@@ -2,25 +2,29 @@
 
 ## Project setup
 
+### Environment variables
+
+You can find required env variables by looking at the env schema here -> `src\common\schemas\env.ts`
+
 ```bash
 $ pnpm install
 ```
 
-## Generate database migration scripts
+### Generate database migration scripts
 
 ```bash
 # development
 $ pnpm db:generate
 ```
 
-## Perform database migration
+### Perform database migration
 
 ```bash
 # development
 $ pnpm db:migrate
 ```
 
-## Compile and run the project
+### Compile and run the project
 
 ```bash
 # development
@@ -33,7 +37,7 @@ $ pnpm run start:dev
 $ pnpm run start:prod
 ```
 
-## Run tests
+### Run tests
 
 ```bash
 # unit tests
