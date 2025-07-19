@@ -70,3 +70,5 @@ docker-compose.yml
 docker-compose.yaml
 
 drizzle
+
+data.json
