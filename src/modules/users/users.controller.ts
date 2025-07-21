@@ -26,7 +26,7 @@ export class UsersController {
     const code = this.otpService.generateCode();
     await this.otpService.sendOtp({ ...data, code, type: "verification" });
 
-    return { message: "User created successfully" };
+    return { message: "Account created successfully" };
   }
 
   @Post("verify")
