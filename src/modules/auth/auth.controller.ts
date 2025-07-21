@@ -33,7 +33,10 @@ export class AuthController {
   async login(@Body() body: LoginUserRequestDto, @Req() request: Request) {
     const user = await this.authService.verifyLogin(body);
     const token = await this.authService.signIn(user, request);
-    return { message: "Login successful", data: token };
+    return {
+      message: "Login successful",
+      data: token,
+    };
   }
 
   @HttpCode(HttpStatus.OK)
@@ -45,7 +48,6 @@ export class AuthController {
     if (!user) throw new UnauthorizedException("User not found");
 
     const data = {
-      id: user.id,
       email: user.email,
       name: user.name,
       emailVerifiedAt: user.emailVerifiedAt,
