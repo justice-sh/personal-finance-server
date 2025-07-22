@@ -4,17 +4,17 @@ import { OAuthProvider } from "./types";
 import { getOAuthClient } from "./manager";
 import { oAuthProviders } from "./constants";
 import { Inject, Injectable } from "@nestjs/common";
+import * as schema from "@/modules/database/schemas";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
-import * as userSchemas from "@/modules/database/schemas/user";
 import { NodePgDatabase } from "drizzle-orm/node-postgres/driver";
 import { DATABASE_CONNECTION } from "@/modules/database/database-connection";
-import { OAuthAccountTable, UserTable } from "@/modules/database/schemas/user";
+import { OAuthAccountTable } from "@/modules/database/schemas/oauth-account";
 
 @Injectable()
 export class OAuthService {
   constructor(
     @Inject(DATABASE_CONNECTION)
-    private readonly db: NodePgDatabase<typeof userSchemas>,
+    private readonly db: NodePgDatabase<typeof schema>,
   ) {}
 
   getAuthUrl(req: Request): string {
@@ -52,20 +52,15 @@ export class OAuthService {
   ) {
     return this.db.transaction(async (trx) => {
       let user = await trx.query.UserTable.findFirst({
-        where: eq(UserTable.email, email),
+        where: eq(schema.UserTable.email, email),
         columns: { id: true, email: true },
       });
 
       if (user == null) {
         const [newUser] = await trx
-          .insert(UserTable)
-          .values({
-            email,
-            name,
-            password: "",
-            emailVerifiedAt: new Date(),
-          })
-          .returning({ id: UserTable.id, email: UserTable.email });
+          .insert(schema.UserTable)
+          .values({ email, name, emailVerifiedAt: new Date() })
+          .returning({ id: schema.UserTable.id, email: schema.UserTable.email });
 
         user = newUser;
       }

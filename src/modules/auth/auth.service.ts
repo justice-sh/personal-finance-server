@@ -1,9 +1,9 @@
 import { Request } from "express";
 import { User } from "../database/types";
+import { JwtPayload } from "jsonwebtoken";
 import { JwtService } from "@/modules/jwt/jwt.service";
 import { UsersService } from "@/modules/users/users.service";
-import { BadRequestException, Injectable, Req } from "@nestjs/common";
-import { JwtPayload } from "jsonwebtoken";
+import { BadRequestException, Injectable } from "@nestjs/common";
 
 @Injectable()
 export class AuthService {
@@ -29,6 +29,8 @@ export class AuthService {
   async verifyLogin(data: { email: string; password: string }) {
     const user = await this.usersService.findByEmail(data.email);
     if (!user) throw new BadRequestException("Invalid email or password");
+
+    if (!user.password) throw new BadRequestException("Invalid email or password");
 
     const isValid = await this.usersService.verifyPassword(data.password, user.password);
     if (!isValid) throw new BadRequestException("Invalid email or password");

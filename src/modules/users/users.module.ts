@@ -1,11 +1,12 @@
-import { Module } from "@nestjs/common";
 import { UsersService } from "./users.service";
+import { OtpService } from "../otp/otp.service";
+import { Global, Module } from "@nestjs/common";
+import { AuthService } from "../auth/auth.service";
 import { UsersController } from "./users.controller";
 import { JwtService } from "@/modules/jwt/jwt.service";
-import { OtpService } from "../otp/otp.service";
 import { NotificationService } from "../notification/notification.service";
-import { AuthService } from "../auth/auth.service";
 
+@Global()
 @Module({
   controllers: [UsersController],
   providers: [UsersService, JwtService, OtpService, NotificationService, AuthService],
