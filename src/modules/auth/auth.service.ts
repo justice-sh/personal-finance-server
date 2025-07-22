@@ -14,8 +14,6 @@ export class AuthService {
   async signIn(user: Pick<User, "id" | "email">, request: Request) {
     const accessToken = this.generateToken(user);
 
-    request.res?.setHeader("Authorization", `Bearer ${accessToken}`);
-
     request.res?.cookie("access_token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
