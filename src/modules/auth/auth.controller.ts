@@ -40,6 +40,32 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @Get("oauth/:provider")
+  async getOAuthUrl(@Req() req: Request) {
+    const url = this.oAuthService.getAuthUrl(req);
+    return { url };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get("callback/:provider")
+  async providerCallback(@Req() req: Request<{ provider: string }>) {
+    const user = await this.oAuthService.linkUser(req);
+    const auth = this.authService.signIn(user, req);
+
+    return {
+      message: `${req.params.provider} login successful`,
+      data: auth,
+    };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post("logout")
+  async logout(@Req() request: Request) {
+    this.authService.signOut(request);
+    return { message: "Logout successful" };
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Post("me")
   @UseGuards(AuthorizationGuard)
   async me(@Req() request: { user: AuthUser }) {
@@ -57,21 +83,11 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get("oauth/:provider")
-  async getOAuthUrl(@Req() req: Request) {
-    const url = this.oAuthService.getAuthUrl(req);
-    return { url };
-  }
-
-  @HttpCode(HttpStatus.OK)
-  @Get("callback/:provider")
-  async providerCallback(@Req() req: Request<{ provider: string }>) {
-    const user = await this.oAuthService.linkUser(req);
-    const auth = this.authService.signIn(user, req);
-
-    return {
-      message: `${req.params.provider} login successful`,
-      data: auth,
-    };
+  @Post("refresh")
+  @UseGuards(AuthorizationGuard)
+  async refresh(@Req() request: Request) {
+    const user = request.user as AuthUser;
+    const token = await this.authService.signIn(user, request);
+    return { message: "Auth refresh successful", data: token };
   }
 }

@@ -5,6 +5,8 @@ import { JwtService } from "@/modules/jwt/jwt.service";
 import { UsersService } from "@/modules/users/users.service";
 import { BadRequestException, Injectable } from "@nestjs/common";
 
+const cookie_name = "access_token";
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,14 +16,18 @@ export class AuthService {
   async signIn(user: Pick<User, "id" | "email">, request: Request) {
     const accessToken = this.generateToken(user);
 
-    request.res?.cookie("access_token", accessToken, {
+    request.res?.cookie(cookie_name, accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,
+      sameSite: process.env.NODE_ENV === "production" ? "lax" : "none",
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     });
 
     return { accessToken };
+  }
+
+  signOut(request: Request) {
+    request.res?.clearCookie(cookie_name);
   }
 
   async verifyLogin(data: { email: string; password: string }) {
@@ -38,16 +44,17 @@ export class AuthService {
     return user;
   }
 
-  retriveToken(request: Request): string | undefined {
+  retrieveToken(request: Request): string | undefined {
     const authorization = request.headers["authorization"];
 
     let token = authorization?.split(" ")[1];
     if (token) return token;
 
-    token = request.cookies?.["access_token"];
+    token = request.cookies?.[cookie_name];
     if (token) return token;
 
-    token = request.body.accessToken;
+    token = request.body?.accessToken;
+
     return token;
   }
 

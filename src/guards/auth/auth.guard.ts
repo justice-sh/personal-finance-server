@@ -1,7 +1,8 @@
+import { Request } from "express";
 import { AuthUser } from "@/types/guards";
 import { AuthService } from "@/modules/auth/auth.service";
 import { UsersService } from "@/modules/users/users.service";
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
@@ -11,17 +12,17 @@ export class AuthorizationGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest() as Request;
 
-    const token = this.authService.retriveToken(request);
+    const token = this.authService.retrieveToken(request);
     if (!token) throw new UnauthorizedException("No token provided");
 
     const tokenPayload = await this.authService.verifyToken(token).catch(() => {
-      throw new UnauthorizedException("Invalid token");
+      throw new ForbiddenException("Invalid token");
     });
 
     const user = await this.usersService.findByEmail(tokenPayload.email);
-    if (!user) throw new UnauthorizedException("User not found");
+    if (!user) throw new ForbiddenException("User not found");
 
     // TODO: enable later, also, consider having a EmailNotVerifiedException
     // if (!user.emailVerifiedAt) throw new UnauthorizedException("Email not verified");

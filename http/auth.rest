@@ -10,8 +10,13 @@ Content-Type: application/json
 
 Post {{baseUrl}}/auth/me
 Content-Type: application/json
-{{authorization-header}}
+{{cookie}}
 
 ###
 
 Get {{baseUrl}}/auth/oauth/google
+
+###
+
+Post {{baseUrl}}/auth/logout
+{{cookie}}
