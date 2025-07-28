@@ -7,23 +7,34 @@ export class CacheService {
   constructor(@Inject(CACHE_MANAGER) private cache: Cache) {}
 
   async get<T>(key: string): Promise<T | undefined> {
-    const value = await this.cache.get<T>(key);
-
-    // this.cache.stores.forEach((store) => {
-    //   console.log(`Cache store: ${store}`);
-    // });
-
-    return value;
+    return this.cache.get<T>(key);
   }
 
-  async set<T>(key: string, value: T, ttl?: number): Promise<void> {
-    await this.cache.set(key, value, ttl);
-  }
-  async del(key: string): Promise<void> {
-    await this.cache.del(key);
+  async set<T>(key: string, value: T, ttl?: number): Promise<T> {
+    return this.cache.set(key, value, ttl);
   }
 
-  async clear(): Promise<void> {
-    await this.cache.clear();
+  async del(key: string): Promise<boolean> {
+    return this.cache.del(key);
   }
+
+  async clear(): Promise<boolean> {
+    return this.cache.clear();
+  }
+
+  // getByPrefix<T>(prefix: string) {
+  //   const flatStore: { key: string; value: T }[] = [];
+
+  //   this.cache.stores.map(async (store) => {
+  //     if (store?.iterator) {
+  //       for await (const [key, value] of store.iterator({})) {
+  //         if (key.startsWith(prefix)) {
+  //           flatStore.push({ key, value });
+  //         }
+  //       }
+  //     }
+  //   });
+
+  //   return flatStore;
+  // }
 }
