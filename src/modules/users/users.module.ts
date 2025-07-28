@@ -3,8 +3,8 @@ import { OtpService } from "../otp/otp.service";
 import { Global, Module } from "@nestjs/common";
 import { AuthService } from "../auth/auth.service";
 import { UsersController } from "./users.controller";
-import { JwtService } from "@/modules/jwt/jwt.service";
-import { NotificationService } from "../notification/notification.service";
+import { JwtService } from "@/common/jwt/jwt.service";
+import { NotificationService } from "@/infrastructure/notification/notification.service";
 
 @Global()
 @Module({

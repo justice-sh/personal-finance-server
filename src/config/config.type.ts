@@ -1,5 +1,5 @@
-import { EnvData } from "@/types/env";
-import { StringValue } from "@/types/jwt";
+import { EnvData } from "@/shared/types/env";
+import { StringValue } from "@/shared/types/jwt";
 
 export type ConfigData = Omit<EnvData, "JWT_SECRET"> & {
   JWT: {

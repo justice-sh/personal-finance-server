@@ -3,7 +3,7 @@ import { CreateUserDto } from "./user.dto";
 import { OtpService } from "../otp/otp.service";
 import { UsersService } from "./users.service";
 import { AuthService } from "../auth/auth.service";
-import { ZodValidationPipe } from "@/pipes/zod-validation/zod-validation.pipe";
+import { ZodValidationPipe } from "@/common/pipes/zod-validation/zod-validation.pipe";
 import { BadRequestException, Body, Controller, Post, Req, UsePipes } from "@nestjs/common";
 
 @Controller("users")

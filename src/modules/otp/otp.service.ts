@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { NotificationService } from "../notification/notification.service";
+import { NotificationService } from "@/infrastructure/notification/notification.service";
 
 @Injectable()
 export class OtpService {

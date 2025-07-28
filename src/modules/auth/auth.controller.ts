@@ -11,13 +11,13 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import { Request } from "express";
-import { AuthUser } from "@/types/guards";
 import { AuthService } from "./auth.service";
+import { AuthUser } from "@/shared/types/guards";
 import { OAuthService } from "./oauth/oauth.service";
 import { LoginUserRequestDto } from "./dto/auth.dto";
 import { UsersService } from "../users/users.service";
-import { AuthorizationGuard } from "@/guards/auth/auth.guard";
-import { ZodValidationPipe } from "@/pipes/zod-validation/zod-validation.pipe";
+import { AuthorizationGuard } from "@/common/guards/auth/auth.guard";
+import { ZodValidationPipe } from "@/common/pipes/zod-validation/zod-validation.pipe";
 
 @Controller("auth")
 @UsePipes(new ZodValidationPipe())

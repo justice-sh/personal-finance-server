@@ -1,6 +1,6 @@
-import { PasswordSchema } from "@/common/schemas/user";
-import { createZodDto } from "nestjs-zod";
 import z from "zod";
+import { createZodDto } from "nestjs-zod";
+import { PasswordSchema } from "@/shared/schemas/user";
 
 export class CreateUserDto extends createZodDto(
   z.object({

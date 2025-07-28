@@ -2,7 +2,7 @@ import { Pool } from "pg";
 import * as schema from "./schemas";
 import { Global, Module } from "@nestjs/common";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { ConfigService } from "../config/config.service";
+import { ConfigService } from "@/config/config.service";
 import { DATABASE_CONNECTION } from "./database-connection";
 
 @Global()

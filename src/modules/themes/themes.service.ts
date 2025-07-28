@@ -1,8 +1,8 @@
-import { Theme } from "../database/types";
-import * as schemas from "../database/schemas";
 import { Inject, Injectable } from "@nestjs/common";
+import { Theme } from "@/infrastructure/database/types";
+import * as schemas from "@/infrastructure/database/schemas";
 import { NodePgDatabase } from "drizzle-orm/node-postgres/driver";
-import { DATABASE_CONNECTION } from "../database/database-connection";
+import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 
 @Injectable()
 export class ThemesService {

@@ -1,8 +1,8 @@
-import { AuthUser } from "@/types/guards";
+import { AuthUser } from "@/shared/types/guards";
 import { CreateBudgetDto } from "./budget.dto";
 import { BudgetsService } from "./budgets.service";
-import { AuthorizationGuard } from "@/guards/auth/auth.guard";
-import { ZodValidationPipe } from "@/pipes/zod-validation/zod-validation.pipe";
+import { AuthorizationGuard } from "@/common/guards/auth/auth.guard";
+import { ZodValidationPipe } from "@/common/pipes/zod-validation/zod-validation.pipe";
 import { Body, Controller, Get, Post, Req, UseGuards, UsePipes } from "@nestjs/common";
 
 @Controller("budgets")

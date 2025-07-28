@@ -1,5 +1,5 @@
-import { ConfigService } from "@/modules/config/config.service";
 import { OAuthClient } from "../base";
+import { ConfigService } from "@/config/config.service";
 import { z } from "zod";
 
 export function createGoogleOAuthClient() {

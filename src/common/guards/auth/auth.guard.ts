@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { AuthUser } from "@/types/guards";
+import { AuthUser } from "@/shared/types/guards";
 import { AuthService } from "@/modules/auth/auth.service";
 import { UsersService } from "@/modules/users/users.service";
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";

@@ -1,10 +1,10 @@
 import "dotenv/config";
-import { EnvData } from "@/types/env";
 import { ConfigData } from "./config.type";
 import { Injectable } from "@nestjs/common";
-import { EnvSchema } from "@/common/schemas/env";
-import { ExactPathForValue } from "@/types/utils";
+import { EnvData } from "@/shared/types/env";
+import { EnvSchema } from "@/shared/schemas/env";
 import { fromZodError } from "zod-validation-error";
+import { ExactPathForValue } from "@/shared/types/utils";
 
 @Injectable()
 export class ConfigService {

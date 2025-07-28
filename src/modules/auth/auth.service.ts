@@ -1,7 +1,7 @@
 import { Request } from "express";
-import { User } from "../database/types";
 import { JwtPayload } from "jsonwebtoken";
-import { JwtService } from "@/modules/jwt/jwt.service";
+import { JwtService } from "@/common/jwt/jwt.service";
+import { User } from "@/infrastructure/database/types";
 import { UsersService } from "@/modules/users/users.service";
 import { BadRequestException, Injectable } from "@nestjs/common";
 

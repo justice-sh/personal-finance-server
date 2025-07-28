@@ -1,11 +1,11 @@
 import { CreateBudgetDto } from "./budget.dto";
-import * as schemas from "../database/schemas";
 import { Inject, Injectable } from "@nestjs/common";
-import { BudgetWRelations } from "../database/types";
 import { ThemesService } from "../themes/themes.service";
+import * as schemas from "@/infrastructure/database/schemas";
 import { NodePgDatabase } from "drizzle-orm/node-postgres/driver";
+import { BudgetWRelations } from "@/infrastructure/database/types";
 import { CategoriesService } from "../categories/categories.service";
-import { DATABASE_CONNECTION } from "../database/database-connection";
+import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 
 @Injectable()
 export class BudgetsService {

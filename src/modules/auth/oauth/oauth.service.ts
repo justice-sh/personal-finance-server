@@ -4,11 +4,11 @@ import { OAuthProvider } from "./types";
 import { getOAuthClient } from "./manager";
 import { oAuthProviders } from "./constants";
 import { Inject, Injectable } from "@nestjs/common";
-import * as schema from "@/modules/database/schemas";
+import * as schema from "@/infrastructure/database/schemas";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
 import { NodePgDatabase } from "drizzle-orm/node-postgres/driver";
-import { DATABASE_CONNECTION } from "@/modules/database/database-connection";
-import { OAuthAccountTable } from "@/modules/database/schemas/oauth-account";
+import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
+import { OAuthAccountTable } from "@/infrastructure/database/schemas/oauth-account";
 
 @Injectable()
 export class OAuthService {

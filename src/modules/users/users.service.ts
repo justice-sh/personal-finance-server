@@ -1,21 +1,21 @@
 import * as bcrypt from "bcrypt";
-import { User } from "../database/types";
 import { CreateUserDto } from "./user.dto";
 import { Inject, Injectable } from "@nestjs/common";
-import * as userSchemas from "../database/schemas/user";
+import { User } from "@/infrastructure/database/types";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
+import * as schemas from "@/infrastructure/database/schemas/";
 import { NodePgDatabase } from "drizzle-orm/node-postgres/driver";
-import { DATABASE_CONNECTION } from "../database/database-connection";
+import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(DATABASE_CONNECTION)
-    private readonly database: NodePgDatabase<typeof userSchemas>,
+    private readonly database: NodePgDatabase<typeof schemas>,
   ) {}
 
   async create(data: CreateUserDto): Promise<User> {
-    const result = await this.database.insert(userSchemas.UserTable).values(data).returning();
+    const result = await this.database.insert(schemas.UserTable).values(data).returning();
     return result[0];
   }
 
@@ -33,9 +33,9 @@ export class UsersService {
 
   async updateUser(id: string, data: Partial<User>) {
     const result = await this.database
-      .update(userSchemas.UserTable)
+      .update(schemas.UserTable)
       .set(data)
-      .where(eq(userSchemas.UserTable.id, id))
+      .where(eq(schemas.UserTable.id, id))
       .returning();
 
     return result[0];

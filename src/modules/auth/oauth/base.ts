@@ -1,6 +1,6 @@
 import { z } from "zod";
 import * as crypto from "crypto";
-import { ConfigService } from "@/modules/config/config.service";
+import { ConfigService } from "@/config/config.service";
 import { OAuthProvider, OAuthURLs, OAuthUserInfo } from "./types";
 
 // This map is used to store states for CSRF protection

@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { OtpService } from "./otp.service";
-import { NotificationService } from "../notification/notification.service";
+import { NotificationService } from "@/infrastructure/notification/notification.service";
 
 @Module({
   providers: [OtpService, NotificationService],
