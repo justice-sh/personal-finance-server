@@ -25,7 +25,7 @@ export class ConfigService {
       ...data,
       JWT: {
         secret: data.JWT_SECRET,
-        expiresIn: "5h",
+        expiresIn: "2h",
       },
     };
   }

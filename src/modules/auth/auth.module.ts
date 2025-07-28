@@ -4,12 +4,13 @@ import { AuthController } from "./auth.controller";
 import { OAuthService } from "./oauth/oauth.service";
 import { JwtService } from "@/common/jwt/jwt.service";
 import { UsersService } from "@/modules/users/users.service";
+import { AuthSessionService } from "./auth-session/auth-session.service";
 
 @Global()
 @Module({
   imports: [],
-  providers: [AuthService, JwtService, UsersService, OAuthService],
-  exports: [AuthService],
   controllers: [AuthController],
+  exports: [AuthService, AuthSessionService],
+  providers: [AuthService, JwtService, UsersService, OAuthService, AuthSessionService],
 })
 export class AuthModule {}

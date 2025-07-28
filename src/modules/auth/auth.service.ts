@@ -1,20 +1,24 @@
 import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
+import { AuthUser } from "@/shared/types/guards";
 import { JwtService } from "@/common/jwt/jwt.service";
 import { User } from "@/infrastructure/database/types";
 import { UsersService } from "@/modules/users/users.service";
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { AuthSessionService } from "./auth-session/auth-session.service";
+import { BadRequestException, ForbiddenException, Injectable } from "@nestjs/common";
 
 const cookie_name = "access_token";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private jwtService: JwtService,
-    private usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly authSessionService: AuthSessionService,
   ) {}
-  async signIn(user: Pick<User, "id" | "email">, request: Request) {
+  async signIn(user: AuthUser, request: Request) {
     const accessToken = this.generateToken(user);
+    await this.authSessionService.register(accessToken, user);
 
     request.res?.cookie(cookie_name, accessToken, {
       httpOnly: true,
@@ -24,6 +28,17 @@ export class AuthService {
     });
 
     return { accessToken };
+  }
+
+  async refreshToken(request: Request) {
+    const accessToken = this.retrieveToken(request);
+    if (!accessToken) throw new ForbiddenException("No access token provided");
+
+    const user = await this.authSessionService.find(accessToken);
+    if (!user) throw new ForbiddenException("Invalid access token");
+
+    await this.authSessionService.unregister(accessToken);
+    return this.signIn(user, request);
   }
 
   signOut(request: Request) {
@@ -54,11 +69,10 @@ export class AuthService {
     if (token) return token;
 
     token = request.body?.accessToken;
-
     return token;
   }
 
-  generateToken(user: Pick<User, "id" | "email">) {
+  private generateToken(user: Pick<User, "id" | "email">) {
     const payload = { email: user.email, sub: user.id };
     return this.jwtService.sign(payload);
   }

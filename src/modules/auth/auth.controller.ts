@@ -84,10 +84,8 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post("refresh")
-  @UseGuards(AuthorizationGuard)
   async refresh(@Req() request: Request) {
-    const user = request.user as AuthUser;
-    const token = await this.authService.signIn(user, request);
+    const token = await this.authService.refreshToken(request);
     return { message: "Auth refresh successful", data: token };
   }
 }

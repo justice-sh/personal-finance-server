@@ -15,17 +15,14 @@ export class AuthorizationGuard implements CanActivate {
     const request = context.switchToHttp().getRequest() as Request;
 
     const token = this.authService.retrieveToken(request);
-    if (!token) throw new UnauthorizedException("No token provided");
+    if (!token) throw new ForbiddenException("No token provided");
 
-    const tokenPayload = await this.authService.verifyToken(token).catch(() => {
-      throw new ForbiddenException("Invalid token");
+    const payload = await this.authService.verifyToken(token).catch(() => {
+      throw new UnauthorizedException("Invalid token");
     });
 
-    const user = await this.usersService.findByEmail(tokenPayload.email);
+    const user = await this.usersService.findByEmail(payload.email);
     if (!user) throw new ForbiddenException("User not found");
-
-    // TODO: enable later, also, consider having a EmailNotVerifiedException
-    // if (!user.emailVerifiedAt) throw new UnauthorizedException("Email not verified");
 
     const authUser: AuthUser = { id: user.id, email: user.email };
 
