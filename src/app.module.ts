@@ -8,6 +8,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from "./modules/users/users.module";
 import { ThemesModule } from "./modules/themes/themes.module";
 import { BudgetsModule } from "./modules/budgets/budgets.module";
+import { CacheModule } from "./infrastructure/cache/cache.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
 import { DatabaseModule } from "./infrastructure/database/database.module";
 
@@ -17,6 +18,7 @@ import { DatabaseModule } from "./infrastructure/database/database.module";
     JwtModule,
     AuthModule,
     UsersModule,
+    CacheModule,
     ConfigModule,
     ThemesModule,
     BudgetsModule,
