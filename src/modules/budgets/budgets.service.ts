@@ -57,9 +57,9 @@ export class BudgetsService {
     });
   }
 
-  findOne(budgetId: string) {
+  findOne(data: { id: string; userId: string }) {
     return this.db.query.budgets.findFirst({
-      where: (budgets, { eq }) => eq(budgets.id, budgetId),
+      where: (budgets, { eq, and }) => and(eq(budgets.id, data.id), eq(budgets.userId, data.userId)),
       with: { category: true, theme: true },
     });
   }

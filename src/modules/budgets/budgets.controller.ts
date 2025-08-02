@@ -21,7 +21,7 @@ export class BudgetsController {
   @Get(":id")
   @UseGuards(AuthorizationGuard)
   async getBudget(@Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
-    const budget = await this.budgetsService.findOne(budgetId);
+    const budget = await this.budgetsService.findOne({ id: budgetId, userId: request.user.id });
     if (!budget) throw new NotFoundException("Budget not found");
     return { message: "Budget retrieved successfully", data: this.budgetsService.toResponse(budget) };
   }
