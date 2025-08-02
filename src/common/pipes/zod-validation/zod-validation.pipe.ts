@@ -1,9 +1,11 @@
 import { ZodSchema } from "zod";
 import { fromZodError } from "zod-validation-error";
-import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from "@nestjs/common";
+import { ArgumentMetadata, BadRequestException, Injectable, Logger, PipeTransform } from "@nestjs/common";
 
 @Injectable()
 export class ZodValidationPipe implements PipeTransform {
+  private readonly logger: Logger = new Logger(ZodValidationPipe.name);
+
   constructor(
     private schema?: ZodSchema,
     private preprocess = (data: unknown) => data,
@@ -20,9 +22,9 @@ export class ZodValidationPipe implements PipeTransform {
 
     if (result.success) return result.data as unknown;
 
-    throw new BadRequestException(
-      fromZodError(result.error, { prefix: "", includePath: false, prefixSeparator: "" }).message,
-    );
+    this.logger.error({ message: "Zod validation failed", errors: result.error.errors, value });
+
+    throw new BadRequestException(fromZodError(result.error, { prefix: "", prefixSeparator: "" }).message);
   }
 }
 
