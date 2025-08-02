@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import * as schema from "./schemas";
+import schema from "./schema";
 import { Global, Module } from "@nestjs/common";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { ConfigService } from "@/config/config.service";
