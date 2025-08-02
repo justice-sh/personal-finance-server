@@ -12,7 +12,8 @@ export class CategoriesController {
   @Get()
   @UseGuards(AuthorizationGuard)
   async getCategories(@Req() request: { user: AuthUser }) {
-    const data = await this.categoriesService.getManyByUserId(request.user.id);
+    const categories = await this.categoriesService.findMany(request.user.id);
+    const data = categories.map((category) => this.categoriesService.toResponse(category));
     return { message: "Categories retrieved successfully", data };
   }
 }

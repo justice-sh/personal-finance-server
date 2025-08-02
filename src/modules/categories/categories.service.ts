@@ -17,18 +17,16 @@ export class CategoriesService {
     return category;
   }
 
-  async getManyByUserId(userId: string): Promise<Category[]> {
-    try {
-      const result = await this.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, userId),
-        // with: { categories: true },
-      });
+  async findMany(userId: string): Promise<Category[]> {
+    const result = await this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.id, userId),
+      with: { usersToCategories: { with: { category: true } } },
+    });
 
-      // return result?.categories ?? [];
-      return [];
-    } catch (error) {
-      this.logger.error("Error fetching categories:", error);
-      return [];
-    }
+    return result?.usersToCategories.map((userCategory) => userCategory.category) ?? [];
+  }
+
+  toResponse(category: Category) {
+    return category.name;
   }
 }
