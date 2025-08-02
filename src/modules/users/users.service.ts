@@ -2,42 +2,30 @@ import * as bcrypt from "bcrypt";
 import { CreateUserDto } from "./user.dto";
 import { Inject, Injectable } from "@nestjs/common";
 import { User } from "@/infrastructure/database/types";
+import schemas from "@/infrastructure/database/schema";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
-import * as schemas from "@/infrastructure/database/schemas/";
 import { NodePgDatabase } from "drizzle-orm/node-postgres/driver";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @Inject(DATABASE_CONNECTION)
-    private readonly database: NodePgDatabase<typeof schemas>,
-  ) {}
+  constructor(@Inject(DATABASE_CONNECTION) private readonly db: NodePgDatabase<typeof schemas>) {}
 
   async create(data: CreateUserDto): Promise<User> {
-    const result = await this.database.insert(schemas.UserTable).values(data).returning();
+    const result = await this.db.insert(schemas.users).values(data).returning();
     return result[0];
   }
 
   findById(id: string): Promise<User | undefined> {
-    return this.database.query.UserTable.findFirst({
-      where: (users, { eq }) => eq(users.id, id),
-    });
+    return this.db.query.users.findFirst({ where: (users, { eq }) => eq(users.id, id) });
   }
 
   findByEmail(email: string): Promise<User | undefined> {
-    return this.database.query.UserTable.findFirst({
-      where: (users, { eq }) => eq(users.email, email),
-    });
+    return this.db.query.users.findFirst({ where: (users, { eq }) => eq(users.email, email) });
   }
 
   async updateUser(id: string, data: Partial<User>) {
-    const result = await this.database
-      .update(schemas.UserTable)
-      .set(data)
-      .where(eq(schemas.UserTable.id, id))
-      .returning();
-
+    const result = await this.db.update(schemas.users).set(data).where(eq(schemas.users.id, id)).returning();
     return result[0];
   }
 

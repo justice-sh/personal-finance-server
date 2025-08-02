@@ -1,22 +1,47 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { Theme } from "@/infrastructure/database/types";
-import * as schemas from "@/infrastructure/database/schemas";
-import { NodePgDatabase } from "drizzle-orm/node-postgres/driver";
+import { Color } from "@/shared/enum/color";
+import { PublicTheme } from "./types/public.theme";
+import { ThemePresets } from "./constants/theme.presets";
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import schema from "@/infrastructure/database/schema";
+import { Database, Transaction, Theme } from "@/infrastructure/database/types";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 
 @Injectable()
 export class ThemesService {
-  constructor(
-    @Inject(DATABASE_CONNECTION)
-    private readonly db: NodePgDatabase<typeof schemas>,
-  ) {}
+  private readonly logger: Logger;
 
-  async create(data: { userId: string; name: string; budgetId: string }, db = this.db) {
-    const [theme] = await db.insert(schemas.ThemeTable).values(data).returning();
+  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {
+    this.logger = new Logger(ThemesService.name);
+  }
+
+  async create(data: { color: Color; userId: string }, trx: Transaction) {
+    const [theme] = await trx.insert(schema.themes).values({ color: data.color }).returning();
+    await trx.insert(schema.usersThemes).values({ themeId: theme.id, userId: data.userId }).returning();
     return theme;
   }
 
-  getPublicData({ budgetId, userId, ...theme }: Theme) {
-    return theme;
+  async getPublicThemes(userId: string): Promise<PublicTheme[]> {
+    const themes = await this.getByUserId(userId);
+
+    const usedColors = new Map<Color, boolean>(themes.map((theme) => [theme.color, true]));
+
+    return ThemePresets.map((themePreset) => {
+      const isUsed = Boolean(usedColors.get(themePreset.color));
+      return { ...themePreset, isUsed };
+    });
+  }
+
+  private async getByUserId(userId: string): Promise<Theme[]> {
+    try {
+      const result = await this.db.query.users.findFirst({
+        where: (users, { eq }) => eq(users.id, userId),
+        with: { usersToThemes: true },
+      });
+
+      return [];
+    } catch (error) {
+      this.logger.error(`Error fetching themes: ${error.message}`);
+      return [];
+    }
   }
 }
