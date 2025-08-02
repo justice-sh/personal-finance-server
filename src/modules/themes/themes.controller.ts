@@ -12,7 +12,8 @@ export class ThemesController {
   @Get()
   @UseGuards(AuthorizationGuard)
   async getThemes(@Req() request: { user: AuthUser }) {
-    const data = await this.themesService.getPublicThemes(request.user.id);
+    const themes = await this.themesService.findMany(request.user.id);
+    const data = this.themesService.combinePresets(themes);
     return { message: "Themes retrieved successfully", data };
   }
 }
