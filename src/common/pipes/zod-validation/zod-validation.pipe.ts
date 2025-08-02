@@ -15,15 +15,12 @@ export class ZodValidationPipe implements PipeTransform {
     const metatype = metadata.metatype as NestJsZodMetatype | undefined;
 
     this.schema = this.schema || metatype?.schema;
-
     if (!this.schema) return value;
 
     const result = this.schema.safeParse(this.preprocess(value));
-
     if (result.success) return result.data as unknown;
 
     this.logger.error({ message: "Zod validation failed", errors: result.error.errors, value });
-
     throw new BadRequestException(fromZodError(result.error, { prefix: "", prefixSeparator: "" }).message);
   }
 }
