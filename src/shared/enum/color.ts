@@ -1,0 +1,17 @@
+export enum Color {
+  GREEN = "GREEN",
+  YELLOW = "YELLOW",
+  CYAN = "CYAN",
+  NAVY = "NAVY",
+  RED = "RED",
+  PURPLE = "PURPLE",
+  TURQUOISE = "TURQUOISE",
+  BROWN = "BROWN",
+  MAGENTA = "MAGENTA",
+  BLUE = "BLUE",
+  NAVY_GRAY = "NAVY_GRAY",
+  ARMY_GREEN = "ARMY_GREEN",
+  PINK = "PINK",
+  GOLD = "GOLD",
+  ORANGE = "ORANGE",
+}
