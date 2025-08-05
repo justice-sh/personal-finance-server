@@ -19,8 +19,8 @@ export class BudgetsService {
 
   create(data: CreateBudgetDto & { userId: string }) {
     return this.db.transaction(async (trx) => {
-      const category = await this.categoriesService.upsert(data.category, trx);
       const theme = await this.themesService.upsert(data.color, trx);
+      const category = await this.categoriesService.upsert(data.category, trx);
 
       let existingBudget = await this.findOne({ categoryId: category.id, userId: data.userId });
       if (existingBudget) throw new BadRequestException("Budget with this category already exists");
@@ -43,6 +43,9 @@ export class BudgetsService {
     const budget = await this.findOne({ id, userId });
     if (!budget) throw new BadRequestException("Budget not found");
 
+    if (data.maxAmount && budget.spent > data.maxAmount)
+      throw new BadRequestException("New max amount cannot be less than spent amount");
+
     const updatedBudget = await this.db.transaction(async (trx) => {
       const category = categoryName ? await this.categoriesService.upsert(categoryName, trx) : budget.category;
       const theme = color ? await this.themesService.upsert(color, trx) : budget.theme;
@@ -56,10 +59,8 @@ export class BudgetsService {
       return { ...updatedBudget, theme, category };
     });
 
-    await this.db.transaction(async (trx) => {
-      await this.categoriesService.delete(budget.categoryId, trx);
-      await this.themesService.delete(budget.themeId, trx);
-    });
+    await this.themesService.delete(budget.themeId);
+    await this.categoriesService.delete(budget.categoryId);
 
     return updatedBudget;
   }

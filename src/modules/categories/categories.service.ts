@@ -35,9 +35,9 @@ export class CategoriesService {
     return category ? Promise.resolve(category) : this.create(name, trx);
   }
 
-  async delete(id: string, trx: Transaction) {
+  async delete(id: string) {
     try {
-      await trx.delete(schema.CategoryTable).where(eq(schema.CategoryTable.id, id));
+      await this.db.delete(schema.CategoryTable).where(eq(schema.CategoryTable.id, id));
       return true;
     } catch (error) {
       this.logger.error({ ...error, errorMessage: `Failed to delete category with id ${id}` });

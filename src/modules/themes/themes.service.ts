@@ -36,10 +36,9 @@ export class ThemesService {
     return this.db.query.themes.findFirst({ where: (theme, { eq }) => eq(theme.color, color) });
   }
 
-  async delete(id: string, trx: Transaction) {
-    console.log(`Deleting theme with id: ${id}`);
+  async delete(id: string) {
     try {
-      await trx.delete(schema.themes).where(eq(schema.themes.id, id));
+      await this.db.delete(schema.themes).where(eq(schema.themes.id, id));
       return true;
     } catch (error) {
       this.logger.error({ ...error, errorMessage: `Failed to delete theme with id ${id}` });
