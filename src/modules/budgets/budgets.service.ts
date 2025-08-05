@@ -1,11 +1,12 @@
 import schema from "@/infrastructure/database/schema";
 import { ThemesService } from "../themes/themes.service";
 import { BudgetResponse } from "./dto/budget.response.dto";
-import { CreateBudgetDto } from "./dto/budget.request.dto";
+import { eq } from "drizzle-orm/sql/expressions/conditions";
 import { CategoriesService } from "../categories/categories.service";
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
-import { BudgetWRelations, Database } from "@/infrastructure/database/types";
+import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget.request.dto";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
+import { Budget, BudgetWRelations, Database } from "@/infrastructure/database/types";
 
 @Injectable()
 export class BudgetsService {
@@ -16,30 +17,16 @@ export class BudgetsService {
     private readonly categoriesService: CategoriesService,
   ) {}
 
-  create(data: { userId: string } & CreateBudgetDto) {
+  create(data: CreateBudgetDto & { userId: string }) {
     return this.db.transaction(async (trx) => {
-      const user = await trx.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, data.userId),
-        with: { usersToCategories: true, usersToThemes: true },
-      });
-      if (!user) throw new BadRequestException("User not found");
+      const category = await this.categoriesService.upsert(data.category, trx);
+      const theme = await this.themesService.upsert(data.color, trx);
 
-      let category = await trx.query.CategoryTable.findFirst({
-        where: (category, { eq }) => eq(category.name, data.category),
-      });
+      let existingBudget = await this.findOne({ categoryId: category.id, userId: data.userId });
+      if (existingBudget) throw new BadRequestException("Budget with this category already exists");
 
-      let theme = await trx.query.themes.findFirst({
-        where: (theme, { eq }) => eq(theme.color, data.color),
-      });
-
-      if (category && user.usersToCategories.some((c) => c.categoryId === category!.id))
-        throw new BadRequestException("Category already exists for this user");
-
-      if (theme && user.usersToThemes.some((t) => t.themeId === theme!.id))
-        throw new BadRequestException("Color is already in use");
-
-      if (!category) category = await this.categoriesService.create(data, trx);
-      if (!theme) theme = await this.themesService.create(data, trx);
+      existingBudget = await this.findOne({ themeId: theme.id, userId: data.userId });
+      if (existingBudget) throw new BadRequestException("Budget with this color already exists");
 
       const [budget] = await trx
         .insert(schema.budgets)
@@ -50,6 +37,33 @@ export class BudgetsService {
     });
   }
 
+  async update(data: UpdateBudgetDto & { id: string; userId: string }): Promise<BudgetWRelations> {
+    const { id, userId, category: categoryName, color } = data;
+
+    const budget = await this.findOne({ id, userId });
+    if (!budget) throw new BadRequestException("Budget not found");
+
+    const updatedBudget = await this.db.transaction(async (trx) => {
+      const category = categoryName ? await this.categoriesService.upsert(categoryName, trx) : budget.category;
+      const theme = color ? await this.themesService.upsert(color, trx) : budget.theme;
+
+      const [updatedBudget] = await trx
+        .update(schema.budgets)
+        .set({ maxAmount: data.maxAmount, categoryId: category.id, themeId: theme.id })
+        .where(eq(schema.budgets.id, id))
+        .returning();
+
+      return { ...updatedBudget, theme, category };
+    });
+
+    await this.db.transaction(async (trx) => {
+      await this.categoriesService.delete(budget.categoryId, trx);
+      await this.themesService.delete(budget.themeId, trx);
+    });
+
+    return updatedBudget;
+  }
+
   findMany(userId: string) {
     return this.db.query.budgets.findMany({
       where: (budgets, { eq }) => eq(budgets.userId, userId),
@@ -57,9 +71,12 @@ export class BudgetsService {
     });
   }
 
-  findOne(data: { id: string; userId: string }) {
+  findOne(data: BudgetField) {
+    const keys = Object.keys(data);
+    if (keys.length === 0) throw new BadRequestException("At least one filter must be provided");
+
     return this.db.query.budgets.findFirst({
-      where: (budgets, { eq, and }) => and(eq(budgets.id, data.id), eq(budgets.userId, data.userId)),
+      where: (budgets, filter) => filter.and(...keys.map((key) => eq(budgets[key], data[key]))),
       with: { category: true, theme: true },
     });
   }
@@ -69,3 +86,5 @@ export class BudgetsService {
     return data;
   }
 }
+
+type BudgetField = Partial<{ [key in keyof Budget]: Budget[key] }>;

@@ -26,7 +26,7 @@ export const budgets = pgTable("budgets", {
 });
 
 export const budgetRelations = relations(budgets, ({ one, many }) => ({
+  user: one(users, { fields: [budgets.userId], references: [users.id] }),
   theme: one(themes, { fields: [budgets.themeId], references: [themes.id] }),
   category: one(CategoryTable, { fields: [budgets.categoryId], references: [CategoryTable.id] }),
-  user: one(users, { fields: [budgets.userId], references: [users.id] }),
 }));

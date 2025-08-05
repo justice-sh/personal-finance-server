@@ -9,3 +9,11 @@ export class CreateBudgetDto extends createZodDto(
     maxAmount: z.number().positive("Max amount must be a positive number"),
   }),
 ) {}
+
+export class UpdateBudgetDto extends createZodDto(
+  z.object({
+    category: z.string().optional(),
+    color: z.nativeEnum(Color).optional().describe("Color of the theme"),
+    maxAmount: z.number().positive("Max amount must be a positive number").optional(),
+  }),
+) {}

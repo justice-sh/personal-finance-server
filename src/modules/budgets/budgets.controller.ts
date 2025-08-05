@@ -1,12 +1,11 @@
 import { AuthUser } from "@/shared/types/guards";
 import { BudgetsService } from "./budgets.service";
-import { CreateBudgetDto } from "./dto/budget.request.dto";
 import { AuthorizationGuard } from "@/common/guards/auth/auth.guard";
+import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget.request.dto";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation/zod-validation.pipe";
-import { Body, Controller, Get, NotFoundException, Param, Post, Req, UseGuards, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, Post, Put, Req, UseGuards, UsePipes } from "@nestjs/common";
 
 @Controller("budgets")
-@UsePipes(new ZodValidationPipe())
 export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
 
@@ -28,8 +27,17 @@ export class BudgetsController {
 
   @Post()
   @UseGuards(AuthorizationGuard)
+  @UsePipes(new ZodValidationPipe(CreateBudgetDto))
   async createBudget(@Body() data: CreateBudgetDto, @Req() request: { user: AuthUser }) {
     const budget = await this.budgetsService.create({ ...data, userId: request.user.id });
     return { message: "Budget created successfully", data: this.budgetsService.toResponse(budget) };
+  }
+
+  @Put(":id")
+  @UseGuards(AuthorizationGuard)
+  @UsePipes(new ZodValidationPipe())
+  async updateBudget(@Body() data: UpdateBudgetDto, @Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
+    const budget = await this.budgetsService.update({ id: budgetId, userId: request.user.id, ...data });
+    return { message: "Budget updated successfully", data: this.budgetsService.toResponse(budget) };
   }
 }
