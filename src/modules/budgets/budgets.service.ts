@@ -104,6 +104,9 @@ export class BudgetsService {
       .where(and(eq(schema.budgets.id, budgetId), eq(schema.budgets.userId, userId)))
       .returning();
 
+    if (budget) await this.themesService.delete(budget.themeId);
+    if (budget) await this.categoriesService.delete(budget.categoryId);
+
     return budget;
   }
 
