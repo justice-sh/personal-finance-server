@@ -1,9 +1,21 @@
+import {
+  Get,
+  Req,
+  Put,
+  Body,
+  Post,
+  Param,
+  Delete,
+  UsePipes,
+  UseGuards,
+  Controller,
+  NotFoundException,
+} from "@nestjs/common";
 import { AuthUser } from "@/shared/types/guards";
 import { BudgetsService } from "./budgets.service";
 import { AuthorizationGuard } from "@/common/guards/auth/auth.guard";
 import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget.request.dto";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation/zod-validation.pipe";
-import { Body, Controller, Get, NotFoundException, Param, Post, Put, Req, UseGuards, UsePipes } from "@nestjs/common";
 
 @Controller("budgets")
 export class BudgetsController {
@@ -39,5 +51,12 @@ export class BudgetsController {
   async updateBudget(@Body() data: UpdateBudgetDto, @Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
     const budget = await this.budgetsService.update({ id: budgetId, userId: request.user.id, ...data });
     return { message: "Budget updated successfully", data: this.budgetsService.toResponse(budget) };
+  }
+
+  @Delete(":id")
+  @UseGuards(AuthorizationGuard)
+  async deleteBudget(@Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
+    await this.budgetsService.delete(budgetId, request.user.id);
+    return { message: "Budget deleted successfully" };
   }
 }

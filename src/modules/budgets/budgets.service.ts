@@ -1,7 +1,7 @@
 import schema from "@/infrastructure/database/schema";
 import { ThemesService } from "../themes/themes.service";
 import { BudgetResponse } from "./dto/budget.response.dto";
-import { eq } from "drizzle-orm/sql/expressions/conditions";
+import { and, eq } from "drizzle-orm/sql/expressions/conditions";
 import { CategoriesService } from "../categories/categories.service";
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget.request.dto";
@@ -96,6 +96,15 @@ export class BudgetsService {
       where: (budgets, filter) => filter.and(...keys.map((key) => eq(budgets[key], data[key]))),
       with: { category: true, theme: true },
     });
+  }
+
+  async delete(budgetId: string, userId: string) {
+    const [budget] = await this.db
+      .delete(schema.budgets)
+      .where(and(eq(schema.budgets.id, budgetId), eq(schema.budgets.userId, userId)))
+      .returning();
+
+    return budget;
   }
 
   toResponse({ categoryId, themeId, userId, theme, category, ...budget }: BudgetWRelations) {
