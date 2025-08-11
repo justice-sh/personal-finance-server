@@ -8,7 +8,7 @@ const { createdAt, id } = CommonFields;
 
 // NOTE: The themes table is a flyweight table. It enable us not have duplicate themes in the database.
 
-export const colorEnum = pgEnum("color", Color);
+export const colorEnum = pgEnum("color", Object.values(Color) as [Color, ...Color[]]);
 
 export const themes = pgTable("themes", { id, createdAt, color: colorEnum().notNull() });
 

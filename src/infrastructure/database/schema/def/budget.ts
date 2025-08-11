@@ -3,9 +3,12 @@ import { themes } from "./theme";
 import { relations } from "drizzle-orm";
 import { CategoryTable } from "./category";
 import { CommonFields } from "../common/fields";
-import { doublePrecision, pgTable, uuid } from "drizzle-orm/pg-core";
+import { Currency } from "@/shared/enum/currency";
+import { doublePrecision, pgEnum, pgTable, uuid } from "drizzle-orm/pg-core";
 
 const { createdAt, updatedAt, id } = CommonFields;
+
+export const currencyEnum = pgEnum("currency", Object.values(Currency) as [Currency, ...Currency[]]);
 
 export const budgets = pgTable("budgets", {
   id,
@@ -14,8 +17,9 @@ export const budgets = pgTable("budgets", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  maxAmount: doublePrecision("max_amount").notNull(),
-  currentAmount: doublePrecision("current_amount").notNull().default(0),
+  maxSpend: doublePrecision("max_spend").notNull(),
+  currency: currencyEnum().notNull(),
+  currentAmount: doublePrecision("current_amount").notNull(),
   spent: doublePrecision("spent").default(0).notNull(),
   categoryId: uuid("category_id")
     .notNull()

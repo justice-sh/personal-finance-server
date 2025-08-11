@@ -30,7 +30,14 @@ export class BudgetsService {
 
       const [budget] = await trx
         .insert(schema.budgets)
-        .values({ categoryId: category.id, themeId: theme.id, maxAmount: data.maxAmount, userId: data.userId })
+        .values({
+          categoryId: category.id,
+          themeId: theme.id,
+          maxSpend: data.maxSpend,
+          userId: data.userId,
+          currency: data.currency,
+          currentAmount: data.maxSpend,
+        })
         .returning();
 
       return { ...budget, category, theme };
@@ -43,16 +50,25 @@ export class BudgetsService {
     const budget = await this.findOne({ id, userId });
     if (!budget) throw new BadRequestException("Budget not found");
 
-    if (data.maxAmount && budget.spent > data.maxAmount)
+    if (data.maxSpend && budget.spent > data.maxSpend)
       throw new BadRequestException("New max amount cannot be less than spent amount");
 
     const updatedBudget = await this.db.transaction(async (trx) => {
       const category = categoryName ? await this.categoriesService.upsert(categoryName, trx) : budget.category;
       const theme = color ? await this.themesService.upsert(color, trx) : budget.theme;
 
+      const maxSpend = data.maxSpend || budget.maxSpend,
+        currency = data.currency || budget.currency;
+
       const [updatedBudget] = await trx
         .update(schema.budgets)
-        .set({ maxAmount: data.maxAmount, categoryId: category.id, themeId: theme.id })
+        .set({
+          maxSpend,
+          currency,
+          categoryId: category.id,
+          themeId: theme.id,
+          currentAmount: maxSpend - budget.spent,
+        })
         .where(eq(schema.budgets.id, id))
         .returning();
 

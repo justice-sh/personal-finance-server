@@ -5,6 +5,8 @@ import { pgTable, text } from "drizzle-orm/pg-core";
 
 const { createdAt, id } = CommonFields;
 
+// NOTE: this is also a flyweight table.
+
 export const CategoryTable = pgTable("categories", { id, createdAt, name: text("name").notNull().unique() });
 
 // TODO: make name unique, and index name.
