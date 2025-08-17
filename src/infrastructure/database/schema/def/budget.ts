@@ -1,14 +1,13 @@
 import { users } from "./user";
 import { themes } from "./theme";
+import { currency } from "./currency";
 import { relations } from "drizzle-orm";
 import { CategoryTable } from "./category";
+import { transaction } from "./transaction";
 import { CommonFields } from "../common/fields";
-import { Currency } from "@/shared/enum/currency";
-import { doublePrecision, pgEnum, pgTable, uuid } from "drizzle-orm/pg-core";
+import { doublePrecision, pgTable, uuid } from "drizzle-orm/pg-core";
 
 const { createdAt, updatedAt, id } = CommonFields;
-
-export const currencyEnum = pgEnum("currency", Object.values(Currency) as [Currency, ...Currency[]]);
 
 export const budgets = pgTable("budgets", {
   id,
@@ -18,7 +17,7 @@ export const budgets = pgTable("budgets", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   maxSpend: doublePrecision("max_spend").notNull(),
-  currency: currencyEnum().notNull(),
+  currency: currency().notNull(),
   currentAmount: doublePrecision("current_amount").notNull(),
   spent: doublePrecision("spent").default(0).notNull(),
   categoryId: uuid("category_id")
@@ -30,6 +29,7 @@ export const budgets = pgTable("budgets", {
 });
 
 export const budgetRelations = relations(budgets, ({ one, many }) => ({
+  transactions: many(transaction),
   user: one(users, { fields: [budgets.userId], references: [users.id] }),
   theme: one(themes, { fields: [budgets.themeId], references: [themes.id] }),
   category: one(CategoryTable, { fields: [budgets.categoryId], references: [CategoryTable.id] }),

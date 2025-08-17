@@ -1,5 +1,6 @@
 import { budgets } from "./budget";
 import { relations } from "drizzle-orm";
+import { transaction } from "./transaction";
 import { CommonFields } from "../common/fields";
 import { OAuthAccountTable } from "./oauth-account";
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
@@ -18,5 +19,6 @@ export const users = pgTable("users", {
 
 export const userRelations = relations(users, ({ many }) => ({
   budgets: many(budgets),
+  transactions: many(transaction),
   oAuthAccounts: many(OAuthAccountTable),
 }));

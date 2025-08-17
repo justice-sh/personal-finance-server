@@ -42,3 +42,14 @@ export type ValueOfPath<T, K extends string> = K extends keyof T
 export type ExactPathForValue<T, V> = {
   [K in Path<T>]: [V] extends [ValueOfPath<T, K>] ? ([ValueOfPath<T, K>] extends [V] ? K : never) : never;
 }[Path<T>];
+
+/**
+ * Construct a type with the properties of T except for those in type K.
+ * I have this because Omit from TypeScript is not type-safe.
+ */
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+/**
+ * Make the keys in K required in T.
+ */
+export type RequiredKeys<T, K extends keyof T> = { [P in K]-?: T[P] } & Omit<T, K>;

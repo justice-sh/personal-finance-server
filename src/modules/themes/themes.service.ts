@@ -4,7 +4,7 @@ import schema from "@/infrastructure/database/schema";
 import { ThemePresets } from "./constants/theme.presets";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { Database, Transaction, Theme } from "@/infrastructure/database/types";
+import { Database, DatabaseTx, Theme } from "@/infrastructure/database/types";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 
 @Injectable()
@@ -13,12 +13,12 @@ export class ThemesService {
 
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
-  async create(color: Color, trx: Transaction) {
+  async create(color: Color, trx: DatabaseTx) {
     const [theme] = await trx.insert(schema.themes).values({ color }).returning();
     return theme;
   }
 
-  async upsert(color: Color, trx: Transaction) {
+  async upsert(color: Color, trx: DatabaseTx) {
     const theme = await this.findByColor(color);
     return theme ? Promise.resolve(theme) : this.create(color, trx);
   }

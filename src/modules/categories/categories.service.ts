@@ -1,7 +1,7 @@
 import schema from "@/infrastructure/database/schema";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
-import { Category, Database, Transaction } from "@/infrastructure/database/types";
+import { Category, Database, DatabaseTx } from "@/infrastructure/database/types";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 
 @Injectable()
@@ -10,7 +10,7 @@ export class CategoriesService {
 
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
-  async create(name: string, trx: Transaction) {
+  async create(name: string, trx: DatabaseTx) {
     const [category] = await trx.insert(schema.CategoryTable).values({ name }).returning();
     return category;
   }
@@ -30,7 +30,7 @@ export class CategoriesService {
     });
   }
 
-  async upsert(name: string, trx: Transaction) {
+  async upsert(name: string, trx: DatabaseTx) {
     const category = await this.findByName(name);
     return category ? Promise.resolve(category) : this.create(name, trx);
   }

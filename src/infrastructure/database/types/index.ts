@@ -4,7 +4,7 @@ import { ExtractTablesWithRelations } from "drizzle-orm/relations";
 import { NodePgDatabase, NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 
 export type User = typeof schema.users.$inferSelect;
-export type UserRelation = typeof schema.userRelations;
+// export type UserRelation = typeof schema.userRelations;
 
 export type Budget = typeof schema.budgets.$inferSelect;
 
@@ -14,8 +14,9 @@ export type Category = typeof schema.CategoryTable.$inferSelect;
 
 export type Theme = typeof schema.themes.$inferSelect;
 
-export type Transaction = PgTransaction<NodePgQueryResultHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>;
+export type Transaction = typeof schema.transaction.$inferSelect;
+export type CreateTransaction = typeof schema.transaction.$inferInsert;
 
-export type Database = NodePgDatabase<typeof schema> | Transaction;
+export type DatabaseTx = PgTransaction<NodePgQueryResultHKT, typeof schema, ExtractTablesWithRelations<typeof schema>>;
 
-// let d: UserRelation = "usersToCategories";
+export type Database = DatabaseTx | NodePgDatabase<typeof schema>;

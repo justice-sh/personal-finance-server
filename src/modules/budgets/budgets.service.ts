@@ -1,9 +1,11 @@
 import schema from "@/infrastructure/database/schema";
 import { ThemesService } from "../themes/themes.service";
 import { BudgetResponse } from "./dto/budget.response.dto";
+import { TransactionType } from "@/shared/enum/transaction";
 import { and, eq } from "drizzle-orm/sql/expressions/conditions";
 import { CategoriesService } from "../categories/categories.service";
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { TransactionsService } from "../transactions/transactions.service";
 import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget.request.dto";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 import { Budget, BudgetWRelations, Database } from "@/infrastructure/database/types";
@@ -15,6 +17,7 @@ export class BudgetsService {
     private readonly db: Database,
     private readonly themesService: ThemesService,
     private readonly categoriesService: CategoriesService,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   create(data: CreateBudgetDto & { userId: string }) {
@@ -39,6 +42,18 @@ export class BudgetsService {
           currentAmount: data.maxSpend,
         })
         .returning();
+
+      await this.transactionsService.create(
+        {
+          budgetId: budget.id,
+          userId: data.userId,
+          amount: data.maxSpend,
+          currency: data.currency,
+          type: TransactionType.ALLOCATION,
+          description: `Created ${category.name} budget`,
+        },
+        trx,
+      );
 
       return { ...budget, category, theme };
     });
