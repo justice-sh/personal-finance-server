@@ -14,7 +14,7 @@ import {
 import { AuthUser } from "@/shared/types/guards";
 import { BudgetsService } from "./budgets.service";
 import { AuthorizationGuard } from "@/common/guards/auth/auth.guard";
-import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget.request.dto";
+import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget-request.dto";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation/zod-validation.pipe";
 
 @Controller("budgets")

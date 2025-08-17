@@ -16,7 +16,6 @@ export class UpdateBudgetDto extends createZodDto(
   z.object({
     category: z.string().optional(),
     color: z.nativeEnum(Color).optional().describe("Color of the theme"),
-    maxSpend: z.number().positive("Max amount must be a positive number").optional(),
     currency: z
       .enum(Object.values(Currency) as [Currency, ...Currency[]])
       .describe("Currency of the budget")

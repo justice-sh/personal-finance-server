@@ -1,12 +1,12 @@
 import schema from "@/infrastructure/database/schema";
 import { ThemesService } from "../themes/themes.service";
-import { BudgetResponse } from "./dto/budget.response.dto";
+import { BudgetResponse } from "./dto/budget-response.dto";
 import { TransactionType } from "@/shared/enum/transaction";
 import { and, eq } from "drizzle-orm/sql/expressions/conditions";
 import { CategoriesService } from "../categories/categories.service";
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { TransactionsService } from "../transactions/transactions.service";
-import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget.request.dto";
+import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget-request.dto";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 import { Budget, BudgetWRelations, Database } from "@/infrastructure/database/types";
 
@@ -65,33 +65,22 @@ export class BudgetsService {
     const budget = await this.findOne({ id, userId });
     if (!budget) throw new BadRequestException("Budget not found");
 
-    if (data.maxSpend && budget.spent > data.maxSpend)
-      throw new BadRequestException("New max amount cannot be less than spent amount");
-
     const updatedBudget = await this.db.transaction(async (trx) => {
       const category = categoryName ? await this.categoriesService.upsert(categoryName, trx) : budget.category;
       const theme = color ? await this.themesService.upsert(color, trx) : budget.theme;
 
-      const maxSpend = data.maxSpend || budget.maxSpend,
-        currency = data.currency || budget.currency;
+      const currency = data.currency || budget.currency;
 
       const [updatedBudget] = await trx
         .update(schema.budgets)
-        .set({
-          maxSpend,
-          currency,
-          categoryId: category.id,
-          themeId: theme.id,
-          currentAmount: maxSpend - budget.spent,
-        })
+        .set({ currency, categoryId: category.id, themeId: theme.id })
         .where(eq(schema.budgets.id, id))
         .returning();
 
       return { ...updatedBudget, theme, category };
     });
 
-    await this.themesService.delete(budget.themeId);
-    await this.categoriesService.delete(budget.categoryId);
+    await Promise.all([this.themesService.delete(budget.themeId), this.categoriesService.delete(budget.categoryId)]);
 
     return updatedBudget;
   }
