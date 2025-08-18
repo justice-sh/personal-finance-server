@@ -5,6 +5,7 @@ import { CreateTransactionDto } from "./dto/transaction-request.dto";
 import { TransactionResponse } from "./dto/transaction-response.dto";
 import { Database, Transaction } from "@/infrastructure/database/types";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
+import { currency } from "@/infrastructure/database/schema/def/currency";
 
 @Injectable()
 export class TransactionsService {
@@ -23,6 +24,8 @@ export class TransactionsService {
         amount: schema.transaction.amount,
         status: schema.transaction.status,
         category: schema.CategoryTable.name,
+        avatar: schema.transaction.avatarUrl,
+        currency: schema.transaction.currency,
         createdAt: schema.transaction.createdAt,
         description: schema.transaction.description,
       })

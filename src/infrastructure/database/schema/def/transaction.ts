@@ -31,7 +31,7 @@ export const transaction = pgTable("transactions", {
   description: text().notNull(),
   avatarUrl: text("avatar_url"),
   amount: doublePrecision().notNull(),
-  currency: currency(),
+  currency: currency().notNull(),
 });
 
 export const transactionRelations = relations(transaction, ({ one }) => ({
