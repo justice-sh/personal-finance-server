@@ -1,6 +1,9 @@
 import { sql } from "drizzle-orm";
+import { TransactionSortBy } from "./enums/sort-by";
+import * as queryUtils from "./utils/query-helpers";
 import { Inject, Injectable } from "@nestjs/common";
 import schema from "@/infrastructure/database/schema";
+import { formatSortByLabel } from "./utils/formatters";
 import { CreateTransactionDto } from "./dto/transaction-request.dto";
 import { TransactionResponse } from "./dto/transaction-response.dto";
 import { Database, Transaction } from "@/infrastructure/database/types";
@@ -16,32 +19,22 @@ export class TransactionsService {
     return result[0];
   }
 
-  async findMany({ userId, limit, offset, description, budgetId }: FindOption): Promise<TransactionResponse> {
+  async findMany({ userId, limit, offset, description, budgetId, sortBy }: FindOption): Promise<TransactionResponse> {
     const conditions = [eq(schema.transaction.userId, userId)];
 
     if (description) conditions.push(ilike(schema.transaction.description, `%${description}%`));
     if (budgetId) conditions.push(eq(schema.transaction.budgetId, budgetId));
 
     const dataQuery = this.db
-      .select({
-        id: schema.transaction.id,
-        type: schema.transaction.type,
-        amount: schema.transaction.amount,
-        status: schema.transaction.status,
-        category: schema.CategoryTable.name,
-        avatar: schema.transaction.avatarUrl,
-        currency: schema.transaction.currency,
-        createdAt: schema.transaction.createdAt,
-        description: schema.transaction.description,
-      })
+      .select(queryUtils.selectFields())
       .from(schema.transaction)
       .where(and(...conditions))
       .innerJoin(schema.budgets, eq(schema.budgets.id, schema.transaction.budgetId))
-      .innerJoin(schema.CategoryTable, eq(schema.CategoryTable.id, schema.budgets.categoryId))
-      .orderBy(sql`created_at desc`);
+      .innerJoin(schema.CategoryTable, eq(schema.CategoryTable.id, schema.budgets.categoryId));
 
     if (limit) dataQuery.limit(limit);
     if (offset) dataQuery.offset(offset);
+    if (sortBy) queryUtils.applySort(sortBy, dataQuery);
 
     const totalQuery = this.db
       .select({ count: sql<number>`count(*)` })
@@ -52,6 +45,10 @@ export class TransactionsService {
 
     return { data, meta: { total: total[0].count, limit: limit || total[0].count, offset: offset || 0 } };
   }
+
+  getSortBy() {
+    return Object.values(TransactionSortBy).map((value) => ({ value, label: formatSortByLabel(value) }));
+  }
 }
 
 type FindOption = {
@@ -60,4 +57,5 @@ type FindOption = {
   offset?: number;
   description?: string;
   budgetId?: string;
+  sortBy?: TransactionSortBy;
 };
