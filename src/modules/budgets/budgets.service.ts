@@ -69,6 +69,14 @@ export class BudgetsService {
       const category = categoryName ? await this.categoriesService.upsert(categoryName, trx) : budget.category;
       const theme = color ? await this.themesService.upsert(color, trx) : budget.theme;
 
+      let existingBudget = await this.findOne({ categoryId: category.id, userId: data.userId });
+      if (existingBudget && existingBudget.id !== budget.id)
+        throw new BadRequestException("Budget with this category already exists");
+
+      existingBudget = await this.findOne({ themeId: theme.id, userId: data.userId });
+      if (existingBudget && existingBudget.id !== budget.id)
+        throw new BadRequestException("Budget with this color already exists");
+
       const currency = data.currency || budget.currency;
 
       const [updatedBudget] = await trx
