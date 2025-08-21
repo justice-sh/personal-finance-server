@@ -98,6 +98,7 @@ export class BudgetsService {
     return this.db.query.budgets.findMany({
       where: (budgets, { eq }) => eq(budgets.userId, userId),
       with: { category: true, theme: true },
+      orderBy: (budgets, { desc }) => desc(budgets.createdAt),
     });
   }
 
