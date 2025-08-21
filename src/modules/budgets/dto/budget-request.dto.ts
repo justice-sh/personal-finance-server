@@ -5,30 +5,50 @@ import { Currency } from "@/shared/enum/currency";
 import { BudgetAdjustmentType } from "../enums/budget-adjustment-type";
 
 export class CreateBudgetDto extends createZodDto(
-  z.object({
-    category: z.string().nonempty("Category is required"),
-    color: z.nativeEnum(Color).describe("Color of the theme"),
-    maxSpend: z.number().positive("Max amount must be a positive number"),
-    currency: z.enum(Object.values(Currency) as [Currency, ...Currency[]]).describe("Currency of the budget"),
-  }),
+  z
+    .object({
+      category: z.string().nonempty("Category is required"),
+      color: z.nativeEnum(Color).describe("Color of the theme"),
+      maxSpend: z.number().positive("Max amount must be a positive number"),
+      currency: z.enum(Object.values(Currency) as [Currency, ...Currency[]]).describe("Currency of the budget"),
+    })
+    .transform((data) => {
+      data.category = data.category.toLowerCase();
+      data.color = data.color.toUpperCase() as Color;
+      data.currency = data.currency.toUpperCase() as Currency;
+      return data;
+    }),
 ) {}
 
 export class UpdateBudgetDto extends createZodDto(
-  z.object({
-    category: z.string().optional(),
-    color: z.nativeEnum(Color).optional().describe("Color of the theme"),
-    currency: z
-      .enum(Object.values(Currency) as [Currency, ...Currency[]])
-      .describe("Currency of the budget")
-      .optional(),
-  }),
+  z
+    .object({
+      category: z.string().optional(),
+      color: z.nativeEnum(Color).optional().describe("Color of the theme"),
+      currency: z
+        .enum(Object.values(Currency) as [Currency, ...Currency[]])
+        .describe("Currency of the budget")
+        .optional(),
+    })
+    .transform((data) => {
+      if (data.category) data.category = data.category.toLowerCase();
+      if (data.color) data.color = data.color.toUpperCase() as Color;
+      if (data.currency) data.currency = data.currency.toUpperCase() as Currency;
+      return data;
+    }),
 ) {}
 
 export class SpendBudgetDto extends createZodDto(
-  z.object({
-    description: z.string().describe("Reason for spend"),
-    amount: z.number().positive("Amount must be a positive number").describe("Amount to spend"),
-  }),
+  z
+    .object({
+      description: z.string().describe("Reason for spend"),
+      amount: z.number().positive("Amount must be a positive number").describe("Amount to spend"),
+    })
+    .transform((data) => {
+      data.description = data.description.toLowerCase();
+      return data;
+    })
+    .describe("Perform spend operation on a budget"),
 ) {}
 
 export class AdjustBudgetDto extends createZodDto(
@@ -40,5 +60,9 @@ export class AdjustBudgetDto extends createZodDto(
         .describe("Type of adjustment"),
       reason: z.string().optional().describe("Reason for adjustment"),
     })
-    .describe("Adjustment the amount of your budget by increasing or decreasing it."),
+    .transform((data) => {
+      if (data.reason) data.reason = data.reason.toLowerCase();
+      return data;
+    })
+    .describe("Increase or Decrease the allocated amount for a budget"),
 ) {}
