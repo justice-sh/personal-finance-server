@@ -14,8 +14,6 @@ export class CreateBudgetDto extends createZodDto(
     })
     .transform((data) => {
       data.category = data.category.toLowerCase();
-      data.color = data.color.toUpperCase() as Color;
-      data.currency = data.currency.toUpperCase() as Currency;
       return data;
     }),
 ) {}
@@ -32,8 +30,6 @@ export class UpdateBudgetDto extends createZodDto(
     })
     .transform((data) => {
       if (data.category) data.category = data.category.toLowerCase();
-      if (data.color) data.color = data.color.toUpperCase() as Color;
-      if (data.currency) data.currency = data.currency.toUpperCase() as Currency;
       return data;
     }),
 ) {}
