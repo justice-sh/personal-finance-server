@@ -20,8 +20,8 @@ export class TransactionsController {
   ) {
     const response = await this.transactionsService.findMany({
       userId: request.user.id,
-      limit,
-      offset,
+      limit: Number(limit),
+      offset: Number(offset),
       description: query,
       budgetId,
       sortBy,
