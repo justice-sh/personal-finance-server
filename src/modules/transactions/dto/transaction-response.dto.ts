@@ -2,7 +2,7 @@ import { Currency } from "@/shared/enum/currency";
 import { TransactionStatus, TransactionType } from "@/shared/enum/transaction";
 
 export type TransactionResponse = {
-  data: {
+  transactions: {
     id: string;
     type: TransactionType;
     amount: number;
