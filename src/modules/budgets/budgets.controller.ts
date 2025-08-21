@@ -14,15 +14,15 @@ import {
 import { AuthUser } from "@/shared/types/guards";
 import { BudgetsService } from "./budgets.service";
 import { AuthorizationGuard } from "@/common/guards/auth/auth.guard";
-import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget-request.dto";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation/zod-validation.pipe";
+import { AdjustBudgetDto, CreateBudgetDto, SpendBudgetDto, UpdateBudgetDto } from "./dto/budget-request.dto";
 
 @Controller("budgets")
+@UseGuards(AuthorizationGuard)
 export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
 
   @Get()
-  @UseGuards(AuthorizationGuard)
   async getBudgets(@Req() request: { user: AuthUser }) {
     const budgets = await this.budgetsService.findMany(request.user.id);
     const data = budgets.map((b) => this.budgetsService.toResponse(b));
@@ -30,7 +30,6 @@ export class BudgetsController {
   }
 
   @Get(":id")
-  @UseGuards(AuthorizationGuard)
   async getBudget(@Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
     const budget = await this.budgetsService.findOne({ id: budgetId, userId: request.user.id });
     if (!budget) throw new NotFoundException("Budget not found");
@@ -38,15 +37,14 @@ export class BudgetsController {
   }
 
   @Post()
-  @UseGuards(AuthorizationGuard)
   @UsePipes(new ZodValidationPipe(CreateBudgetDto))
   async createBudget(@Body() data: CreateBudgetDto, @Req() request: { user: AuthUser }) {
     const budget = await this.budgetsService.create({ ...data, userId: request.user.id });
     return { message: "Budget created successfully", data: this.budgetsService.toResponse(budget) };
   }
 
+  // TODO: change to Patch -> we only update partially, Put is for full replace.
   @Put(":id")
-  @UseGuards(AuthorizationGuard)
   @UsePipes(new ZodValidationPipe())
   async updateBudget(@Body() data: UpdateBudgetDto, @Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
     const budget = await this.budgetsService.update({ id: budgetId, userId: request.user.id, ...data });
@@ -54,9 +52,22 @@ export class BudgetsController {
   }
 
   @Delete(":id")
-  @UseGuards(AuthorizationGuard)
   async deleteBudget(@Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
     await this.budgetsService.delete(budgetId, request.user.id);
     return { message: "Budget deleted successfully" };
+  }
+
+  @Post(":id/spend")
+  @UsePipes(new ZodValidationPipe())
+  async spend(@Body() data: SpendBudgetDto, @Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
+    const budget = await this.budgetsService.spend({ budgetId, userId: request.user.id, ...data });
+    return { message: `Spent ${data.amount} successfully`, data: this.budgetsService.toResponse(budget) };
+  }
+
+  @Post(":id/adjustment")
+  @UsePipes(new ZodValidationPipe())
+  async adjust(@Body() data: AdjustBudgetDto, @Param("id") budgetId: string, @Req() request: { user: AuthUser }) {
+    const budget = await this.budgetsService.adjust({ budgetId, userId: request.user.id, ...data });
+    return { message: `Budget ${data.type.toLowerCase()}d successfully`, data: this.budgetsService.toResponse(budget) };
   }
 }

@@ -6,9 +6,10 @@ import { and, eq } from "drizzle-orm/sql/expressions/conditions";
 import { CategoriesService } from "../categories/categories.service";
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { TransactionsService } from "../transactions/transactions.service";
-import { CreateBudgetDto, UpdateBudgetDto } from "./dto/budget-request.dto";
+import { calculateBudgetAdjustment } from "./utils/calc-budget-adjustment";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 import { Budget, BudgetWRelations, Database } from "@/infrastructure/database/types";
+import { AdjustBudgetDto, CreateBudgetDto, SpendBudgetDto, UpdateBudgetDto } from "./dto/budget-request.dto";
 
 @Injectable()
 export class BudgetsService {
@@ -47,10 +48,10 @@ export class BudgetsService {
         {
           budgetId: budget.id,
           userId: data.userId,
-          amount: data.maxSpend,
-          currency: data.currency,
+          amount: budget.maxSpend,
+          currency: budget.currency,
           type: TransactionType.ALLOCATION,
-          description: `Created ${category.name} budget`,
+          description: `Budget allocation: ${category.name}`,
         },
         trx,
       );
@@ -125,6 +126,71 @@ export class BudgetsService {
   toResponse({ categoryId, themeId, userId, theme, category, ...budget }: BudgetWRelations) {
     const data: BudgetResponse = { ...budget, color: theme.color, category: category.name };
     return data;
+  }
+
+  async spend(data: { userId: string; budgetId: string } & SpendBudgetDto) {
+    const { budgetId, userId } = data;
+
+    const budget = await this.findOne({ id: budgetId, userId });
+    if (!budget) throw new BadRequestException("Budget not found");
+
+    if (budget.currentAmount < data.amount) throw new BadRequestException("Available balance is too small for this spend.");
+
+    const spent = budget.spent + data.amount;
+    const currentAmount = budget.maxSpend - spent;
+
+    return this.db.transaction(async (trx) => {
+      const [updatedBudget] = await trx
+        .update(schema.budgets)
+        .set({ currentAmount, spent })
+        .where(eq(schema.budgets.id, budgetId))
+        .returning();
+
+      await this.transactionsService.create(
+        {
+          budgetId: updatedBudget.id,
+          userId,
+          amount: data.amount,
+          currency: updatedBudget.currency,
+          type: TransactionType.SPEND,
+          description: data.description,
+        },
+        trx,
+      );
+
+      return { ...budget, ...updatedBudget };
+    });
+  }
+
+  async adjust(data: { userId: string; budgetId: string } & AdjustBudgetDto) {
+    const { budgetId, userId } = data;
+
+    const budget = await this.findOne({ id: budgetId, userId });
+    if (!budget) throw new BadRequestException("Budget not found");
+
+    const adjustment = calculateBudgetAdjustment(budget, data);
+
+    return this.db.transaction(async (trx) => {
+      const [updatedBudget] = await trx
+        .update(schema.budgets)
+        .set({ maxSpend: adjustment.maxSpend, currentAmount: adjustment.balance })
+        .where(eq(schema.budgets.id, budgetId))
+        .returning();
+
+      await this.transactionsService.create(
+        {
+          budgetId: updatedBudget.id,
+          userId,
+          amount: data.amount,
+          currency: updatedBudget.currency,
+          type: adjustment.txType,
+          description: adjustment.description,
+        },
+        trx,
+      );
+
+      return { ...budget, ...updatedBudget };
+    });
   }
 }
 
