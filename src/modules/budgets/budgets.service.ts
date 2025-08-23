@@ -10,6 +10,7 @@ import { calculateBudgetAdjustment } from "./utils/calc-budget-adjustment";
 import { DATABASE_CONNECTION } from "@/infrastructure/database/database-connection";
 import { Budget, BudgetWRelations, Database } from "@/infrastructure/database/types";
 import { AdjustBudgetDto, CreateBudgetDto, SpendBudgetDto, UpdateBudgetDto } from "./dto/budget-request.dto";
+import { Currency } from "@/shared/enum/currency";
 
 @Injectable()
 export class BudgetsService {
@@ -192,6 +193,22 @@ export class BudgetsService {
 
       return { ...budget, ...updatedBudget };
     });
+  }
+
+  async sumBalances(userId: string, currency: Currency) {
+    const budgets = await this.findMany(userId);
+
+    // TODO: convert from current currency to target currency at the current rate.
+
+    return budgets.reduce(
+      (acc, budget) => {
+        acc.expense += budget.spent;
+        acc.income += budget.maxSpend;
+        acc.balance += budget.currentAmount;
+        return acc;
+      },
+      { income: 0, expense: 0, balance: 0, currency },
+    );
   }
 }
 

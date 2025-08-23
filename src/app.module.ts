@@ -8,6 +8,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from "./modules/users/users.module";
 import { ThemesModule } from "./modules/themes/themes.module";
 import { BudgetsModule } from "./modules/budgets/budgets.module";
+import { BalanceModule } from "./modules/balance/balance.module";
 import { CacheModule } from "./infrastructure/cache/cache.module";
 import { CategoriesModule } from "./modules/categories/categories.module";
 import { DatabaseModule } from "./infrastructure/database/database.module";
@@ -22,6 +23,7 @@ import { TransactionsModule } from "./modules/transactions/transactions.module";
     CacheModule,
     ConfigModule,
     ThemesModule,
+    BalanceModule,
     BudgetsModule,
     DatabaseModule,
     CategoriesModule,
