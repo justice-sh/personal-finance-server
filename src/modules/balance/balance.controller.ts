@@ -6,7 +6,7 @@ import { AuthorizationGuard } from "@/common/guards/auth/auth.guard";
 import { Controller, Get, Param, Req, UseGuards } from "@nestjs/common";
 import { ZodValidationPipe } from "@/common/pipes/zod-validation/zod-validation.pipe";
 
-@Controller("balance")
+@Controller("balances")
 @UseGuards(AuthorizationGuard)
 export class BalanceController {
   constructor(private readonly balanceSv: BalanceService) {}
