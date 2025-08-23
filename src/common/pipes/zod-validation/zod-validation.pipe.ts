@@ -1,15 +1,15 @@
-import { ZodSchema } from "zod";
+import z, { ZodSchema } from "zod";
 import { ZodDto } from "nestjs-zod";
 import { fromZodError } from "zod-validation-error";
 import { ArgumentMetadata, BadRequestException, Injectable, Logger, PipeTransform } from "@nestjs/common";
 
 @Injectable()
-export class ZodValidationPipe implements PipeTransform {
+export class ZodValidationPipe<S extends ZodSchema, T extends z.infer<S>> implements PipeTransform {
   private readonly logger: Logger = new Logger(ZodValidationPipe.name);
 
   constructor(
-    private schema?: ZodSchema | ZodDto,
-    private preprocess = (data: unknown) => data,
+    private schema?: S | ZodDto,
+    private preprocess: PreprocessFn<T> = (data) => data as T,
   ) {}
 
   transform(value: unknown, metadata: ArgumentMetadata) {
@@ -39,4 +39,13 @@ export class ZodValidationPipe implements PipeTransform {
 interface NestJsZodMetatype {
   isZodDto?: boolean;
   schema?: ZodSchema;
+}
+
+type PreprocessFn<T> = (data: unknown) => T;
+
+export function createZodValidationPipe<S extends ZodSchema, T extends z.infer<S>>(
+  schema?: S | ZodDto,
+  preprocess?: PreprocessFn<T>,
+) {
+  return new ZodValidationPipe(schema, preprocess);
 }
