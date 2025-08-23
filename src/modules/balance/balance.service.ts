@@ -6,7 +6,7 @@ import { Injectable } from "@nestjs/common";
 export class BalanceService {
   constructor(private readonly budgetSv: BudgetsService) {}
 
-  async getBalances(userId: string, currency: Currency) {
+  async getBalance(userId: string, currency: Currency) {
     return this.budgetSv.sumBalances(userId, currency);
   }
 }
