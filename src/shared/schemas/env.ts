@@ -14,4 +14,9 @@ export const EnvSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().min(1),
 
   CLIENT_APP_URL: z.string().url(),
+
+  VALID_ORIGINS: z.preprocess((value) => {
+    if (typeof value !== "string") return value;
+    return value.split(",");
+  }, z.array(z.string().url())),
 });
