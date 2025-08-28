@@ -3,6 +3,7 @@ import { AppService } from "./app.service";
 import { AppController } from "./app.controller";
 import { JwtModule } from "./common/jwt/jwt.module";
 import { OtpModule } from "./modules/otp/otp.module";
+import { PdfModule } from "./modules/pdf/pdf.module";
 import { ConfigModule } from "./config/config.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from "./modules/users/users.module";
@@ -18,6 +19,7 @@ import { TransactionsModule } from "./modules/transactions/transactions.module";
   imports: [
     OtpModule,
     JwtModule,
+    PdfModule,
     AuthModule,
     UsersModule,
     CacheModule,
