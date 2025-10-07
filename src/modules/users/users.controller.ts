@@ -44,12 +44,39 @@ export class UsersController {
     return { message: "Email verified successfully", data: auth };
   }
 
-  // @Post("forgot-password")
-  // async forgotPassword() {}
+  @Post("users/forgot-password")
+  async forgotPassword(body: { email: string }) {
+    // send forgot password otp to email
+  }
 
-  // @Post("verify-forgot-password")
-  // async verifyForgotPassword() {}
+  @Post("users/reset-password")
+  async resetPassword(body: { code: string; email: string; newPassword: string }) {
+    // verify code
+    // ensure user exists
+    // ensure user's email is verified
+    // hash new password
+    // update new password
+  }
 
-  // @Post("reset-password")
-  // async resetPassword() {}
+  // Authenticated endpoint
+  @Post("users/request-change-password")
+  async changePasswordRequest() {
+    // retrieve email from authentication
+    // ensure user exists
+    // ensure email is verified
+    // send change-password otp code
+    // return message otp code sent successfully
+  }
+
+  // Authenticated endpoint
+  @Post("users/change-password")
+  async changePassword(body: { code: string; currentPassword: string; newPassword: string }) {
+    // verify code
+    // retrieve email from authentication
+    // ensure user exists
+    // ensure user's email is verified
+    // ensure currentPassword matches
+    // hash new password
+    // update new password
+  }
 }

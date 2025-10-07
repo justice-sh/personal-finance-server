@@ -27,6 +27,8 @@ export class AuthService {
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     });
 
+    request.res?.setHeader("Authorization", `Bearer ${accessToken}`);
+
     return { accessToken };
   }
 
