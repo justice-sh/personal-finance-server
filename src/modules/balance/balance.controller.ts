@@ -12,10 +12,7 @@ export class BalanceController {
   constructor(private readonly balanceSv: BalanceService) {}
 
   @Get(":currency")
-  async getBalances(
-    @Req() request: { user: AuthUser },
-    @Param("currency", new ZodValidationPipe(CurrencySchema)) currency: Currency,
-  ) {
+  async getBalances(@Req() request: { user: AuthUser }, @Param("currency", new ZodValidationPipe()) currency: Currency) {
     const data = await this.balanceSv.getBalance(request.user.id, currency);
     return { message: "Balances retrieved successfully", data };
   }

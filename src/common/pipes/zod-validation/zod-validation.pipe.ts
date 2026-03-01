@@ -1,14 +1,14 @@
-import z, { ZodSchema } from "zod";
+import z, { ZodObject } from "zod";
 import { ZodDto } from "nestjs-zod";
-import { fromZodError } from "zod-validation-error";
+import { zod } from "@/shared/schemas/zod";
 import { ArgumentMetadata, BadRequestException, Injectable, Logger, PipeTransform } from "@nestjs/common";
 
 @Injectable()
-export class ZodValidationPipe<S extends ZodSchema, T extends z.infer<S>> implements PipeTransform {
+export class ZodValidationPipe<S extends ZodObject, T extends z.infer<S>> implements PipeTransform {
   private readonly logger: Logger = new Logger(ZodValidationPipe.name);
 
   constructor(
-    private schema?: S | ZodDto,
+    private schema?: S | ZodDto<any>,
     private preprocess: PreprocessFn<T> = (data) => data as T,
   ) {}
 
@@ -21,16 +21,18 @@ export class ZodValidationPipe<S extends ZodSchema, T extends z.infer<S>> implem
     const result = schema.safeParse(this.preprocess(value));
     if (result.success) return result.data as unknown;
 
-    this.logger.error({ message: "Zod validation failed", errors: result.error.errors, value });
-    throw new BadRequestException(fromZodError(result.error, { prefix: "" }).message);
+    this.logger.error({ message: "Zod validation failed", errors: result.error, value });
+    throw new BadRequestException(zod.formatError(result).message);
   }
 
-  private parseSchema(dto?: ZodDto | ZodSchema): ZodSchema | undefined {
-    return dto instanceof ZodSchema ? dto : this.extractZodSchema(dto);
+  private parseSchema(dto?: ZodDto<any> | ZodObject): ZodObject | undefined {
+    if (!dto) return undefined;
+    return dto instanceof ZodObject ? dto : this.extractZodSchema(dto);
   }
 
-  private extractZodSchema(data?: NestJsZodMetatype): ZodSchema | undefined {
-    if (data?.isZodDto && data.schema instanceof ZodSchema) return data.schema;
+  private extractZodSchema(data?: NestJsZodMetatype): ZodObject | undefined {
+    if (!data) return undefined;
+    if (data.isZodDto && data.schema instanceof ZodObject) return data.schema;
     return undefined;
   }
 }
@@ -38,13 +40,13 @@ export class ZodValidationPipe<S extends ZodSchema, T extends z.infer<S>> implem
 // NOTE: this is useful if you used `createZodDto` from `nestjs-zod`
 interface NestJsZodMetatype {
   isZodDto?: boolean;
-  schema?: ZodSchema;
+  schema?: ZodObject;
 }
 
 type PreprocessFn<T> = (data: unknown) => T;
 
-export function createZodValidationPipe<S extends ZodSchema, T extends z.infer<S>>(
-  schema?: S | ZodDto,
+export function createZodValidationPipe<S extends ZodObject, T extends z.infer<S>>(
+  schema?: S | ZodDto<any>,
   preprocess?: PreprocessFn<T>,
 ) {
   return new ZodValidationPipe(schema, preprocess);

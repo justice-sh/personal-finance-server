@@ -8,7 +8,7 @@ export class JwtService {
   private readonly options: { secret: string; expiresIn: StringValue };
 
   constructor(private readonly configService: ConfigService) {
-    this.options = this.configService.get((env) => env.JWT);
+    this.options = this.configService.get((env) => ({ secret: env.JWT_SECRET, expiresIn: "3h" }));
   }
 
   sign(payload: string | object): string {
